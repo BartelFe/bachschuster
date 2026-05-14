@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { ManifestSection } from '@/components/manifest/ManifestSection';
+import { WerkeTeaser } from '@/components/werke/WerkeTeaser';
 
 /**
  * Hero loads as a separate chunk — `three` + `@react-three/*` weigh ~250 KB
@@ -14,7 +15,8 @@ export default function HomePage() {
         <HeroSection />
       </Suspense>
       <ManifestSection />
-      {/* W4: Methode teaser · W5: Werke teaser · W7: Globe teaser · W8: Stimmen/Kontakt. */}
+      <WerkeTeaser />
+      {/* W4: Methode teaser (on /methode) · W7: Globe teaser · W8: Stimmen/Kontakt. */}
     </>
   );
 }

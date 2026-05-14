@@ -63,6 +63,31 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-15 · W5 · Werke Index + WestPark Röntgen-Scroll
+
+**Decision:** Five featured Röntgen-Scroll deep-dives (master-prompt §6.3 set: WestPark, Shanghai Pavillon, Mobility Hub, Sen Friedenszentrum + Felix's 5th VW Hope Academy). Other 13 catalog projects render as grid tiles only — no `/werke/:slug` deep-dive page beyond a `PageScaffold` placeholder.
+**Reason:** Master prompt §6.3 specifies four deep-dives, decisions.md 2026-05-14 nominates VW Hope Academy as the 5th. Spending bespoke layer authoring on the remaining 13 would dilute attention from the spec'd projects and inflate scope past the 11-week budget. Tile-grid cards still surface every project — they just don't unlock the X-ray sequence. The placeholder route also avoids "click into nothing" dead-ends.
+
+**Decision:** Total project count = 18 (5 featured + 13 catalog), not 16.
+**Reason:** Master prompt §6.3 names Shanghai Pavillon + Sen Friedenszentrum as deep-dive entries even though no image folders exist for them yet (MAPPING.md). They need to appear in the index so the master-prompt slate is visible end-to-end. The two image-less cards render a coordinate-grid SVG placeholder with the project's slug-code so empty cards feel intentional, not absent.
+
+**Decision:** Röntgen-Scroll = a single pinned ~500vh ScrollTrigger with crossfade-by-progress between five stacked `<svg>` layers + an `<img>` photo overlay on layer 00 + a vertical scanner line riding the cross-fade band + an annotation rail that swaps content at a 0.55-frac threshold.
+**Reason:** The metaphor of "X-ray" wants the user to perceive layer-stripping as a single continuous sweep, not five jump-cuts. A pin with scrubbed cross-fades preserves the cinematic 60fps motion budget the hero set — no react state on the hot path; all opacity writes go through `gsap.set` inside a single `onUpdate`. The 0.55 threshold for annotation-swap (rather than 0.5) makes the dominant-layer label switch FEEL definitive — the user is past the visual midpoint before the text changes.
+
+**Decision:** 5 hand-authored SVG diagrams per WestPark layer, no full-res photography.
+**Reason:** MAPPING.md flags WestPark cover-hero + full-res originals as missing — 311×233 thumbnails can't carry a Röntgen-Scroll hero. SVG diagrams (truss, flow arrows, sightline fan, stakeholder schema) are the right medium for the systems-underneath-the-skin story anyway — Strukturplanung is an idea, not a photograph. The thumbnails get used in the layer 00 photo overlay (which dissolves into the SVG elevation by frac 0.2) + the post-Röntgen context gallery.
+
+**Decision:** Five layers' renderer set keyed by slug; non-WestPark featured projects (Shanghai, Mobility, Sen, VW Hope) reuse the WestPark renderers as W5 placeholders so navigation works end-to-end.
+**Reason:** Master prompt week-cadence puts the other deep-dives in W6. Shipping their routes blank in W5 would leave 4 broken Links in the index. Reusing the renderers + clearly stubbed layer.body strings (`'Folge in W6.'`) lets Felix preview the layout end-to-end and decide W6 priorities, while the W6 task is bounded: replace 4 × 5 = 20 layer renderers and bodies.
+
+**Decision:** `SplitText` instances are stored in a `let split` outside `gsap.context` and `split.revert()` is called from the `useEffect` cleanup BEFORE `ctx.revert()`.
+**Reason:** SplitText mutates the headline's child node list by wrapping every character in a `<span>`. When React tries to unmount the headline, it walks its expected child list (the original text nodes) and calls `removeChild`, which throws `NotFoundError` because the SplitText spans replaced them. Calling `split.revert()` first restores React's expected DOM, then `ctx.revert()` kills the gsap timelines that referenced the (now disposed) span elements. Order matters.
+
+**Decision:** Filter chip counts pre-computed in a `useMemo` over `projects`, not per-render.
+**Reason:** With 18 projects + 6 filter chips, recomputing on every render would be trivial cost but the memoized count map also acts as a typed `Record<FilterId, number>` shape that protects against new categories slipping through unhandled. The count display (`"Privatbauten 04"`) is part of the editorial filter typography — chips that say `00` would be visual deadweight.
+
+---
+
 ## 2026-05-14 · W2 · Hero particle system architecture
 
 **Decision:** Four-tier performance system instead of single quality level: `full` (80 k particles + PostFX), `mid` (40 k + PostFX), `mobile` (15 k + no PostFX), `reduced` (static SVG, no WebGL).

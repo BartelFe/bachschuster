@@ -1,12 +1,11 @@
-import { PageScaffold } from '@/components/layout/PageScaffold';
+import { WerkeIndexSection } from '@/components/werke/WerkeIndexSection';
 
+/**
+ * /werke — Editorial portfolio index. W5 ships the asymmetric grid with
+ * filter row, deep-dive badges, and live counts. Deep dives wire in via
+ * /werke/:slug — WestPark complete in W5; Shanghai / Mobility / Sen / VW
+ * Hope Academy ship in W6.
+ */
 export default function WerkeIndexPage() {
-  return (
-    <PageScaffold
-      pretitle="Werke"
-      title="Was du siehst, ist die Antwort."
-      subtitle="Eine kuratierte Auswahl realisierter und laufender Projekte — Architektur, Stadtplanung, Sonderbau. WestPark Verbindungssteg, Shanghai Pavillion of Innovation, Mobility Hub Ingolstadt, Sen Friedenszentrum Thái Bình."
-      weekBadge="Asymmetrisches Grid + Filter · Woche 5"
-    />
-  );
+  return <WerkeIndexSection />;
 }
