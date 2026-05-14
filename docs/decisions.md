@@ -63,6 +63,25 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-15 · W6 · Four more Röntgen-Scroll deep dives
+
+**Decision:** All four W6 deep dives get their own bespoke SVG layer-renderer file in `src/components/werke/roentgen/layers/` (ShanghaiLayers, MobilityHubLayers, SenLayers, VWHopeLayers). No shared base — each project authors its own visual grammar from the same 1600×900 viewBox.
+**Reason:** A shared layer base would homogenize the deep dives into a templated feel. The pitch wants each project to look like its own piece of editorial — Shanghai gets a Sankey ribbon for material flow that doesn't appear anywhere else; Sen gets sacred-geometry circles instead of an engineering grid; VW Hope gets a Venn-style Trägermodell. The repetition appears only at the Strukturplanung layer (always a 4–7 node stakeholder schema around a central mediator), and that repetition IS the pitch — Strukturplanung is the throughline.
+
+**Decision:** Pin length scales as `(total - 1) * 125vh` per project, not a fixed 500vh.
+**Reason:** 5-layer projects (WestPark, Mobility Hub) get 500vh pin = 600vh total exposure. 4-layer projects (Shanghai, Sen, VW Hope) get 375vh pin = 475vh exposure. Per-transition scroll-budget stays constant at 125vh, so the feel of one layer dissolving to the next is identical across all five deep dives. Felix's user shouldn't sense "the Sen page scrolls faster than WestPark."
+
+**Decision:** Project-specific colour palettes drawn from existing Tailwind stakeholder tokens, no new colours.
+**Reason:** Shanghai pulls accent (terrakotta) + stk-citizens (gold) — EXPO-ness without a literal Chinese-red. Mobility Hub uses all five stakeholder colours simultaneously on Layer 01 to encode the five mobility modes — cyan for cars, gold for scooter, moss for bus, etc. Sen uses stk-citizens as primary gold + accent for the central seed, no cyan — it's a sacred building, blueprints would be tonally wrong. VW Hope uses stk-environment (moss) for the schoolyard + accent for trakts — earth tones for a South African campus.
+
+**Decision:** Strukturplanung layer (always the closing layer) uses identical visual template across all five deep dives: 4–7 stakeholder nodes circling a central terrakotta mediator node labelled "STRUKTURPLANUNG".
+**Reason:** This is the cognitive anchor. The user will see the Strukturplanung layer five times across the deep-dive sequence — and recognise the schema instantly the second time. The stakeholders change (Bahn vs. EXPO-Komitee vs. Sangha vs. VW), the planning method does not. Visual repetition reinforces the brand thesis "vor dem Gebäude, das System."
+
+**Decision:** WerkContext gallery hides when `project.images.length < 3` rather than rendering broken thumbnails.
+**Reason:** Shanghai + Sen have zero photographic assets. Showing the "Bildmaterial folgt" notice keeps the page coherent — better an explicit absence than three broken-image icons. Pitch-time fix is to source originals; W6 ships the structural layout without them.
+
+---
+
 ## 2026-05-15 · W5 · Werke Index + WestPark Röntgen-Scroll
 
 **Decision:** Five featured Röntgen-Scroll deep-dives (master-prompt §6.3 set: WestPark, Shanghai Pavillon, Mobility Hub, Sen Friedenszentrum + Felix's 5th VW Hope Academy). Other 13 catalog projects render as grid tiles only — no `/werke/:slug` deep-dive page beyond a `PageScaffold` placeholder.

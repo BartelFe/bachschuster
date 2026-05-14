@@ -10,17 +10,49 @@ import {
   LayerStrukturplanung,
   PhotoArchitektur,
 } from './layers/WestParkLayers';
+import {
+  PavilionArchitektur,
+  PavilionMaterialfluss,
+  PavilionProgramm,
+  PavilionStrukturplanung,
+} from './layers/ShanghaiLayers';
+import {
+  HubHuelle,
+  HubMobilitaetsstroeme,
+  HubEnergie,
+  HubSozial,
+  HubStrukturplanung,
+} from './layers/MobilityHubLayers';
+import {
+  SenSymbolik,
+  SenSakraleGeometrie,
+  SenProgramm,
+  SenStrukturplanung,
+} from './layers/SenLayers';
+import {
+  HopeArchitektur,
+  HopeBildungsraum,
+  HopeTraegermodell,
+  HopeStrukturplanung,
+} from './layers/VWHopeLayers';
 
 interface RoentgenScrollProps {
-  /** Five layer definitions (one per scroll-stage). */
+  /** Layer definitions (one per scroll-stage). 4 or 5 depending on project. */
   layers: ProjectLayer[];
   /** Project slug — picks the layer renderer set. */
   slug: string;
-  /** Image used for the photo overlay on layer 00. */
+  /** Image used for the photo overlay on layer 00 (WestPark only currently). */
   photo?: string;
 }
 
-const PIN_EXTRA_VH = 500; // → 600vh total of pinned scroll for 5 layers
+/**
+ * Per-layer scroll budget — translates to PIN_EXTRA_VH = (total - 1) * 125%.
+ *  · 5 layers → 500% extra → 600vh exposure (matches W5 WestPark cadence)
+ *  · 4 layers → 375% extra → 475vh exposure
+ * Keeps every layer-to-layer transition equal in scroll-time regardless of
+ * how many layers a project has.
+ */
+const VH_PER_TRANSITION = 125;
 
 interface LayerRenderer {
   /** SVG component drawn full-bleed in the viewer frame. */
@@ -116,11 +148,14 @@ export function RoentgenScroll({ layers, slug, photo }: RoentgenScrollProps) {
         onEnter: () => drawAtLayer(0),
       });
 
-      // Section pin + scroll-driven layer cross-fade.
+      // Section pin + scroll-driven layer cross-fade. Pin length scales
+      // with layer count so the per-transition pace stays constant across
+      // 4-layer and 5-layer deep dives.
+      const pinExtraVh = (total - 1) * VH_PER_TRANSITION;
       ScrollTrigger.create({
         trigger: section,
         start: 'top top',
-        end: `+=${PIN_EXTRA_VH}%`,
+        end: `+=${pinExtraVh}%`,
         pin: true,
         pinSpacing: true,
         anticipatePin: 1,
@@ -338,30 +373,71 @@ export function RoentgenScroll({ layers, slug, photo }: RoentgenScrollProps) {
 }
 
 /**
- * Returns the layer renderer set for a given project slug. WestPark is fully
- * implemented in W5. Other featured projects (Shanghai, Mobility, Sen, VW
- * Hope) get scaffold renderers that reuse the WestPark diagrams as
- * placeholders until W6 ships their bespoke layers.
+ * Returns the layer renderer set for a given project slug. All five featured
+ * deep dives ship bespoke SVG diagrams (W5 WestPark, W6 Shanghai / Mobility
+ * Hub / Sen / VW Hope).
+ *
+ * Each set's length must equal the project's `layers[]` length — they
+ * cross-fade in lock-step.
+ *
+ * WestPark Layer 00 also takes a photo overlay (the only project where the
+ * built artifact has been photographed). Other deep dives stay SVG-only;
+ * their projection of the architecture happens entirely through hand-drawn
+ * elevation / plan diagrams.
  */
 function buildRendererSet(slug: string, photo: string | undefined): LayerRenderer[] {
-  if (slug === 'westpark-verbindungssteg') {
-    return [
-      { Component: LayerArchitektur, Photo: photo ?? '/projects/westpark-verbindungssteg/02.avif' },
-      { Component: LayerTragstruktur },
-      { Component: LayerMobilitaet },
-      { Component: LayerSichtachsen },
-      { Component: LayerStrukturplanung },
-    ];
+  switch (slug) {
+    case 'westpark-verbindungssteg':
+      return [
+        {
+          Component: LayerArchitektur,
+          Photo: photo ?? '/projects/westpark-verbindungssteg/02.avif',
+        },
+        { Component: LayerTragstruktur },
+        { Component: LayerMobilitaet },
+        { Component: LayerSichtachsen },
+        { Component: LayerStrukturplanung },
+      ];
+    case 'shanghai-pavillion-of-innovation':
+      return [
+        { Component: PavilionArchitektur },
+        { Component: PavilionMaterialfluss },
+        { Component: PavilionProgramm },
+        { Component: PavilionStrukturplanung },
+      ];
+    case 'mobility-hub-ingolstadt':
+      return [
+        { Component: HubHuelle },
+        { Component: HubMobilitaetsstroeme },
+        { Component: HubEnergie },
+        { Component: HubSozial },
+        { Component: HubStrukturplanung },
+      ];
+    case 'sen-friedenszentrum-thai-binh':
+      return [
+        { Component: SenSymbolik },
+        { Component: SenSakraleGeometrie },
+        { Component: SenProgramm },
+        { Component: SenStrukturplanung },
+      ];
+    case 'vw-hope-academy-suedafrika':
+      return [
+        { Component: HopeArchitektur },
+        { Component: HopeBildungsraum },
+        { Component: HopeTraegermodell },
+        { Component: HopeStrukturplanung },
+      ];
+    default:
+      // Unknown slug — fall back to WestPark renderers so the structural
+      // layout still renders rather than crashing the route.
+      return [
+        { Component: LayerArchitektur },
+        { Component: LayerTragstruktur },
+        { Component: LayerMobilitaet },
+        { Component: LayerSichtachsen },
+        { Component: LayerStrukturplanung },
+      ];
   }
-  // W6 placeholder set: re-use WestPark layers with no photo so the deep
-  // dive page is at least structurally complete on the other featured slugs.
-  return [
-    { Component: LayerArchitektur },
-    { Component: LayerTragstruktur },
-    { Component: LayerMobilitaet },
-    { Component: LayerSichtachsen },
-    { Component: LayerStrukturplanung },
-  ];
 }
 
 function FrameTicks() {

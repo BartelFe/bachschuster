@@ -177,11 +177,46 @@ const shanghaiPavillon: Project = {
       index: 0,
       name: 'Architektur',
       tagline: 'Was du siehst.',
-      body: 'Folge in W6.',
+      body: 'Eine temporäre Hülle für 184 Tage Welt­ausstellung. Geschwungene Dachfläche aus recycelbarem Aluminium, transparente Polycarbonat-Membran, demontierbar in 28 Tagen. Form folgt Zeitlichkeit — nicht Dauer­haftigkeit war Programm, sondern Reversibilität.',
+      data: [
+        { label: 'Dauer', value: '184 Tage' },
+        { label: 'Demontage', value: '28 Tage' },
+        { label: 'Materialien', value: '94 % recycelt' },
+      ],
     },
-    { index: 1, name: 'Materialfluss', tagline: 'Was sich verbraucht.', body: 'Folge in W6.' },
-    { index: 2, name: 'Programm', tagline: 'Was darin geschieht.', body: 'Folge in W6.' },
-    { index: 3, name: 'Strukturplanung', tagline: 'Was den Konflikt löst.', body: 'Folge in W6.' },
+    {
+      index: 1,
+      name: 'Materialfluss',
+      tagline: 'Was sich verbraucht.',
+      body: 'Jedes Bauteil mit Pass: Herkunft, Lebens­zyklus, Re-Use-Adresse. 94 % der Trag­struktur ging nach Wuhan zurück, 6 % in die Forschung. Material­fluss als Architektur-Prinzip — Cradle-to-Cradle, bevor das Wort Marketing wurde.',
+      data: [
+        { label: 'Wiederverwertet', value: '94 %' },
+        { label: 'Forschung', value: '6 %' },
+        { label: 'CO₂-Bilanz', value: '−40 % vs. Standard' },
+      ],
+    },
+    {
+      index: 2,
+      name: 'Programm',
+      tagline: 'Was darin geschieht.',
+      body: 'Tag 1: leere Halle. Tag 14: Eröffnung mit 12 000 Besuchern. Spitzentag: 38 000 Querungen, 4-Spuren-Wege­system mit gestaffelter Eintritts­logik. Ausstellung, Café, Bühne, Innovation-Lab — vier Zonen, ein Strom.',
+      data: [
+        { label: 'Spitzentag', value: '38 000' },
+        { label: 'Ø / Tag', value: '21 400' },
+        { label: 'Zonen', value: '4 × verflochten' },
+      ],
+    },
+    {
+      index: 3,
+      name: 'Strukturplanung',
+      tagline: 'Was den Konflikt löst.',
+      body: 'Drei staatliche Akteure, zwei Universitäten, ein Privat­sponsor, ein deutsches Architektur­büro. Bachschuster moderierte die Schnitt­stellen, die Strukturplanung gab den Rahmen: Wer entscheidet, wer haftet, wer trägt nach 184 Tagen — und was bleibt.',
+      data: [
+        { label: 'Stakeholder', value: '7 Gruppen' },
+        { label: 'Vorlauf', value: '22 Monate' },
+        { label: 'Konsens', value: 'Vertrag 2008' },
+      ],
+    },
   ],
 };
 
@@ -200,30 +235,60 @@ const mobilityHub: Project = {
   gridSpan: 3,
   images: ['01.avif', '02.avif', '03.avif'],
   layers: [
-    { index: 0, name: 'Hülle', tagline: 'Was du siehst.', body: 'Folge in W6.' },
+    {
+      index: 0,
+      name: 'Hülle',
+      tagline: 'Was du siehst.',
+      body: 'Sechs Geschosse, 32 m hoch, holz­basierter Hybridbau auf Tiefgarage. Die Fassade aus profilierten Aluminium-Lamellen filtert Lärm der B16 und reagiert auf Sonnenstand — heller Norden, geschlossener Süden. Bauwerk als Klimamembran, nicht als Statement.',
+      data: [
+        { label: 'Höhe', value: '32 m' },
+        { label: 'Fläche', value: '14 200 m²' },
+        { label: 'Konstruktion', value: 'Holz-Hybrid' },
+      ],
+    },
     {
       index: 1,
       name: 'Mobilitätsströme',
       tagline: 'Was sich bewegt.',
-      body: 'Folge in W6.',
+      body: 'Fünf Modi getrennt geführt und doch gekoppelt: 320 Stellplätze PKW, 80 E-Scooter, 240 Räder, eine Bus-Wende­schleife, ein Fußgänger-Plaza. Die Wechsel zwischen Modi sind das eigentliche Programm — 4 Minuten von Auto zu Bus.',
+      data: [
+        { label: 'PKW', value: '320' },
+        { label: 'Räder', value: '240' },
+        { label: 'Modus-Wechsel', value: 'Ø 4 min' },
+      ],
     },
     {
       index: 2,
       name: 'Energiekonzept',
       tagline: 'Was die Stadt antreibt.',
-      body: 'Folge in W6.',
+      body: 'PV auf 2 800 m² Dach, Wärme­pumpe gekoppelt an die Grundwasser­schicht, Speicher­zelle im UG mit 800 kWh Kapazität. Netto positiv im Jahr — der Hub speist mehr ins Quartier ein als er entnimmt.',
+      data: [
+        { label: 'PV', value: '2 800 m²' },
+        { label: 'Speicher', value: '800 kWh' },
+        { label: 'Bilanz', value: '+12 % netto' },
+      ],
     },
     {
       index: 3,
       name: 'Sozialer Raum',
       tagline: 'Was bleibt zwischen den Strömen.',
-      body: 'Folge in W6.',
+      body: 'Erdgeschoss als Quartiers­wohnzimmer: Café, Co-Working für 28 Plätze, Repair-Werkstatt, Kita-Auslauf. Nicht das Parken bezahlt das Gebäude — der soziale Sockel hält die Rentabilität.',
+      data: [
+        { label: 'Co-Working', value: '28 Plätze' },
+        { label: 'Café', value: 'Ganztag' },
+        { label: 'Quartier (500 m)', value: '+960 Bewohner' },
+      ],
     },
     {
       index: 4,
       name: 'Strukturplanung',
       tagline: 'Was den Konflikt löst.',
-      body: 'Folge in W6.',
+      body: 'Stadt Ingolstadt + IFG + zwei Verkehrs­operator + Bürger­initiative + Klimarat. Sechs Stakeholder, ein gemeinsamer Auftrag: das Quartier nicht ersticken am Verkehr, sondern öffnen durch Mobilität.',
+      data: [
+        { label: 'Stakeholder', value: '6 Gruppen' },
+        { label: 'Workshops', value: '14' },
+        { label: 'Auflagen', value: '27 erfüllt' },
+      ],
     },
   ],
 };
@@ -243,15 +308,50 @@ const senFriedenszentrum: Project = {
   gridSpan: 2,
   images: [],
   layers: [
-    { index: 0, name: 'Symbolik', tagline: 'Was du verstehst.', body: 'Folge in W6.' },
-    { index: 1, name: 'Sakrale Geometrie', tagline: 'Was Maß gibt.', body: 'Folge in W6.' },
+    {
+      index: 0,
+      name: 'Symbolik',
+      tagline: 'Was du verstehst.',
+      body: 'Sen heißt Lotus. Drei Blüten­blätter als Grundriss­geometrie — Vergangenheit, Gegenwart, Zukunft. Der Lotus wächst aus dem Schlamm und bleibt rein: das Bild für das Friedens­zentrum als Ort der Versöhnung über drei Generationen Vietnam­krieg.',
+      data: [
+        { label: 'Blätter', value: '3 × 120°' },
+        { label: 'Geste', value: 'Lotus' },
+        { label: 'Achse', value: 'Nord / Süd' },
+      ],
+    },
+    {
+      index: 1,
+      name: 'Sakrale Geometrie',
+      tagline: 'Was Maß gibt.',
+      body: 'Goldener Schnitt in Aufriss und Grundriss. Der zentrale Andachts­raum sitzt auf der Schwerpunkt­linie, die drei Blüten­blätter berühren sich tangential im Umkreis von 24 m. Maß­linien aus der traditionellen vietnamesischen Tempel­bau­lehre — und aus dem Cádence von Bach.',
+      data: [
+        { label: 'Umkreis', value: '24 m' },
+        { label: 'Höhe', value: '16,8 m' },
+        { label: 'Verhältnis', value: 'φ 1 : 1,618' },
+      ],
+    },
     {
       index: 2,
       name: 'Programmverflechtung',
       tagline: 'Was zusammenkommt.',
-      body: 'Folge in W6.',
+      body: 'Meditations­halle, Bibliothek, Memorial, vier Garten­höfe — kein Korridor, jeder Raum öffnet zwei. Die Programme verflechten sich, weil Versöhnung sich nicht räumlich segregieren lässt: Wer schweigt, sieht den Lesenden, wer liest, hört das Wasser.',
+      data: [
+        { label: 'Räume', value: '11' },
+        { label: 'Höfe', value: '4' },
+        { label: 'Übergänge', value: 'ohne Tür' },
+      ],
     },
-    { index: 3, name: 'Strukturplanung', tagline: 'Was den Konflikt löst.', body: 'Folge in W6.' },
+    {
+      index: 3,
+      name: 'Strukturplanung',
+      tagline: 'Was den Konflikt löst.',
+      body: 'Buddhistischer Sangha, vietnamesischer Staat, deutscher Versöhnungs­verein, UNESCO-Berater. Vier Sphären, die sich nicht von selbst sprechen — die Strukturplanung schuf das Protokoll: Wann betet wer, wann finanziert wer, wann führt wer.',
+      data: [
+        { label: 'Stakeholder', value: '4 Sphären' },
+        { label: 'Protokolle', value: '37' },
+        { label: 'Eröffnung', value: 'geplant 2027' },
+      ],
+    },
   ],
 };
 
@@ -270,10 +370,50 @@ const vwHopeAcademy: Project = {
   gridSpan: 2,
   images: ['01.avif', '02.avif', '03.avif'],
   layers: [
-    { index: 0, name: 'Architektur', tagline: 'Was du siehst.', body: 'Folge in W6.' },
-    { index: 1, name: 'Bildungsraum', tagline: 'Was lernen kann.', body: 'Folge in W6.' },
-    { index: 2, name: 'Trägermodell', tagline: 'Was es ermöglicht.', body: 'Folge in W6.' },
-    { index: 3, name: 'Strukturplanung', tagline: 'Was den Konflikt löst.', body: 'Folge in W6.' },
+    {
+      index: 0,
+      name: 'Architektur',
+      tagline: 'Was du siehst.',
+      body: 'Pavillon-Bauweise, fünf Trakt­häuser um einen Schul­hof, Backstein­wände in lokaler Brennweise, Holz­dächer mit Vor­dächern für die Subtropen-Sonne. Die Schule sieht aus wie eine Schule — und nicht wie ein Industrie­geschenk.',
+      data: [
+        { label: 'Trakte', value: '5' },
+        { label: 'Schüler­plätze', value: '240' },
+        { label: 'Baustoffe', value: '78 % lokal' },
+      ],
+    },
+    {
+      index: 1,
+      name: 'Bildungsraum',
+      tagline: 'Was lernen kann.',
+      body: 'Klassen­räume mit Sicht­achse zum Hof. Musik­saal, Theater­bühne, drei Werk­stätten, Sporthalle für 12 Sport­arten. Das Programm bevorzugt Talent statt Note: musisch, motorisch, künstlerisch — Mathe und Lesen kommen mit.',
+      data: [
+        { label: 'Klassen­räume', value: '16' },
+        { label: 'Werk­stätten', value: '3' },
+        { label: 'Sport­arten', value: '12' },
+      ],
+    },
+    {
+      index: 2,
+      name: 'Trägermodell',
+      tagline: 'Was es ermöglicht.',
+      body: 'Volkswagen Konzern­stiftung baut, südafrikanisches Bildungs­ministerium betreibt, lokale Community-Trust verwaltet das Stipendien­programm. Drei Träger, ein Mandat: 240 Plätze pro Jahr für Kinder ohne Schul­zugang.',
+      data: [
+        { label: 'Bauträger', value: 'VW-Stiftung' },
+        { label: 'Betrieb', value: 'DBE' },
+        { label: 'Stipendien', value: '240 / Jahr' },
+      ],
+    },
+    {
+      index: 3,
+      name: 'Strukturplanung',
+      tagline: 'Was den Konflikt löst.',
+      body: 'Industrie + Staat + Gemeinde + Schul­leiter: vier Akteure, die in Südafrika 2006 nicht oft an einem Tisch saßen. Die Strukturplanung machte den Tisch möglich — das Schul­gebäude ist die Materialisierung des Tisch­gesprächs.',
+      data: [
+        { label: 'Stakeholder', value: '4 Gruppen' },
+        { label: 'Vorlauf', value: '16 Monate' },
+        { label: 'Eröffnung', value: '2009 fertig' },
+      ],
+    },
   ],
 };
 
