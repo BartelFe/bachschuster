@@ -51,3 +51,43 @@ Decisions outside the master prompt's specification. Newest first.
 
 **Decision:** `data-cursor` attribute on hovered elements sets cursor mode (not React props/context).
 **Reason:** Decouples cursor-state from component prop-drilling. Any element can opt in by adding `data-cursor="link"` etc. The CustomCursor's pointermove handler walks `closest('[data-cursor]')` to read the mode — fast, no listener-per-element.
+
+---
+
+## 2026-05-14 · W1 · 5th Werke deep-dive project
+
+**Decision:** The 5th Werke deep-dive project (per master prompt § 6.3 placeholder slot) is **VW Hope Academy Südafrika (2006–2009)**, located in `public/projects/vw-hope-academy-suedafrika/`.
+**Reason:** Master prompt § 6.3 explicitly wishes "idealerweise eines aus Johannesburg, Dubai, Indien oder Brasilien für globale Range" for the 5th project. VW Hope Academy is in South Africa and aligns with Bachschuster's existing Johannesburg office (§ 6.4). It's also socially resonant — a school for talented kids from disadvantaged families — which fits the strukturplanung narrative about resolving conflicts between stakeholders (here: industry/VW, communities, education ministry). Stronger pitch story than the Mobile Space Indien alternative (more visual experiment) or Shandong (China-overlap with EXPO Shanghai).
+
+**How to apply:** When building `src/content/projects.ts` for W5/W6 Werke deep-dives, slot VW Hope Academy as the 5th Project entry. The four spec'd projects from § 6.3 plus VW Hope Academy = 5 deep-dive Röntgen-scrolls. The /architektur catalog projects (Forsthaus, EFH-series, Edeka, Autohaus, Kunst-Kultur Donau, etc.) become Werke-Index-Grid entries without dedicated deep-dive pages — they get a click-through to a smaller layout or a simple image carousel.
+
+---
+
+## 2026-05-14 · W2 · Hero particle system architecture
+
+**Decision:** Four-tier performance system instead of single quality level: `full` (80 k particles + PostFX), `mid` (40 k + PostFX), `mobile` (15 k + no PostFX), `reduced` (static SVG, no WebGL).
+**Reason:** Master prompt § 7 W2 DoD demands "60 fps on M1, 45+ fps mid-tier" plus a mobile fallback at 15 k and a `prefers-reduced-motion` variant. A single quality level would either tank on weak hardware or look anemic on strong hardware. Tiers let us hit the bar everywhere.
+
+**Decision:** uMorph driver is a `useRef<number>` mutated directly by `ScrollTrigger.onUpdate` and `DebugLayerSlider`, read inside `useFrame`. No React state for the per-frame value.
+**Reason:** With `scrub: true`, ScrollTrigger fires onUpdate on every scroll tick (60–120 Hz). React state would cause that many re-renders. The ref-based pattern keeps React out of the hot path entirely — shader uniform mutation happens in the GSAP / R3F frame loop.
+
+**Decision:** ScrollTrigger pin for `+=400 %` extra (= 500 vh total pinned scroll), `scrub: true`, `anticipatePin: 1`.
+**Reason:** Master prompt § 7 W2 task 5: "Pin für 500 vh". `anticipatePin: 1` eliminates the one-frame jump when the pin engages, matching the "smooth" requirement in DoD.
+
+**Decision:** PostFX preset = "subtle Active Theory" — Bloom intensity 0.5 / threshold 0.85, ChromaticAberration offset 0.0008, Vignette offset 0.4 / darkness 0.6. Approved by Felix in W2 concept review.
+**Reason:** Master prompt § 7 W2 task 6 specs Bloom 0.6, Vignette subtle, ChromaticAberration max 0.0015. Felix asked for "spürbar aber nicht aufdringlich" — pulled the values back from the spec's max to land closer to Active Theory's subtle-cinematic preset. ChromAb 0.0008 reads as lens, not glitch.
+
+**Decision:** Custom 5-layer shader with attribute-array target picker, not five separate materials.
+**Reason:** Switching materials mid-scroll would require disposing GPU buffers and rebuilding geometry — would induce frame drops at every layer boundary. Single material with `aTarget0..aTarget4` + `aStkColor` lets the GPU interpolate continuously. Memory cost: ~7 MB at 80 k particles. Fine.
+
+**Decision:** Loading emergence uses `emitter = morphedPos * 0.02` (tiny per-particle starting offset derived from each particle's own target), then lerps to `morphedPos` as `uReveal` goes 0→1. Curl-noise drift scaled by `uReveal` too.
+**Reason:** A single-point burst would create a giant additive-blend bloom spike at frame 1. Per-particle scaled-down emitter spreads them in a small cluster that retains the city's silhouette in miniature, so the reveal feels like growth instead of explosion. Drift gating prevents pre-reveal jitter.
+
+**Decision:** Curl-noise idle drift uses Ashima-Arts 3D simplex + finite-difference curl (6 noise evals/particle/frame). Not simplified for mobile.
+**Reason:** 15 k particles × 6 noise evals × 60 fps = 5.4 M noise calls/s. Modern phones (iPhone 12+, mid-tier Android) handle this trivially. Removing curl noise on mobile would freeze the idle motion and visibly cheapen the experience — not worth the marginal cost saving.
+
+**Decision:** FPS watchdog via drei `<PerformanceMonitor>` with bounds [45, 60] fps, flipflops 3. Auto-downgrade only (no upgrade path).
+**Reason:** Master prompt § 7 W2 DoD wants performance floor + mobile fallback. The watchdog auto-handles the case where a desktop device is weaker than its core count suggests (older GPU, integrated graphics). No-upgrade-path prevents thrash: once we've decided the device is struggling, we stay generous.
+
+**Decision:** Camera parallax `PAN_X 1.0 / PAN_Y 0.55 / DAMPING 0.08`.
+**Reason:** Master prompt § 7 W2 task 7 specifies damping 0.08, doesn't quantify pan. Values picked to give ~12° horizontal / ~7° vertical swing at canvas edges — subtle enough to feel "lens" not "swivel". Y is dampened more (0.55 vs 1.0) because vertical pan reveals the ground plane awkwardly when too pronounced.
