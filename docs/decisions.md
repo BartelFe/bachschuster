@@ -63,6 +63,34 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-15 · W7 · Globe Deep Dive (/netzwerk)
+
+**Decision:** Shader-driven wireframe-dot earth instead of textured photographic basemap.
+**Reason:** No basemap textures exist in the asset pipeline and sourcing high-res ones (Blue Marble at 8 k+, properly cleaned) would balloon the bundle and the asset pipeline. The shader synthesizes a continent SDF from layered value noise + a lat/lng grid + a polar-aware dot matrix. It reads as "earth" at the editorial scale of the pitch without claiming geographic accuracy — and it matches the dot-grid blueprint motif we use in the Werke index placeholder cards, reinforcing the brand grammar.
+
+**Decision:** Day/night terminator driven by real-time sun position (Spencer 1971 declination fit + equation-of-time correction), updated every 1 s in a parent ref consumed by the earth shader's `uSunDir` uniform.
+**Reason:** A static terminator would feel like a screenshot. A wall-time-driven one means every visit shows a slightly different earth — Felix in Ingolstadt at midnight sees Asia lit, Shanghai-time visitors see Europe lit. The terminator's terrakotta dawn-glow band passes over the 4 standorte pins through the day. Cost: trivial — one Vector3 update / sec, the shader does the dot product per fragment.
+
+**Decision:** Pins + connection arcs sit inside a `<RotatingGroup>` that mirrors Earth's autorotation rate, so they appear glued to the surface. The CameraFly component compensates by counter-rotating the group when a standort is locked.
+**Reason:** Putting pins at world-fixed positions while the earth rotated beneath them would have them slide off their cities. Mounting them onto a co-rotating group keeps the geography correct. The lock mechanism in CameraFly subtracts the autorotation phase from the desired target angle each frame so the lerped destination accounts for the ongoing spin.
+
+**Decision:** No OrbitControls — only programmatic camera flies triggered by panel/pin selection.
+**Reason:** Free-drag rotation would invite the user to spin the globe and lose context. The 4 standorte are the entire interactive surface; constraining navigation to "click a standort" keeps the experience editorial rather than toy-like. The autorotation handles "wait, what's behind?" by surfacing the back side every 5 minutes.
+
+**Decision:** Lat/lng-to-Vec3 uses `z = -sin(lng)` (negative z) so lng=0 sits at +X and increasing longitude rotates westward in three.js's right-handed system.
+**Reason:** Default Vector3 mapping would have placed Ingolstadt (11°E) and Linz (14°E) on the back-right of the globe rather than the front-left. Inverting Z mirrors the projection so the standorte appear in their geographically intuitive positions when the user lands on the page facing 0°/0° (Atlantic).
+
+**Decision:** R3F Canvas wrapped in an explicit `<div className="absolute inset-0">` AND a one-time `window.dispatchEvent('resize')` after globe mount.
+**Reason:** Lazy-loading the WebGL chunk causes the canvas to mount AFTER the parent grid cell has already settled at its 805×720 px. `react-use-measure`'s initial ResizeObserver entry races with this and can leave the canvas stuck at its 300×150 intrinsic default. Firing one synthetic resize event after mount forces a re-observe — the canvas snaps to its container size on the next frame. (Bug investigated 2026-05-15, repro on cold dev-server loads.)
+
+**Decision:** Reduced-motion fallback is an SVG equirectangular dot-grid earth with 4 static markers — no WebGL, no autorotation, no live terminator.
+**Reason:** `prefers-reduced-motion` users get the same standort information (city, country, role inferred from position) without any movement. Maintains accessibility without dropping the section entirely.
+
+**Decision:** NetzwerkTeaser on HomePage uses pure SVG (no R3F).
+**Reason:** Loading the WebGL chunk on the home page just to preview the standorte would tax cold visits for a teaser. SVG teaser carries the live local times via the same `formatLocalTime` helper, so it still reads as "live" without 250 KB of three.js.
+
+---
+
 ## 2026-05-15 · W6 · Four more Röntgen-Scroll deep dives
 
 **Decision:** All four W6 deep dives get their own bespoke SVG layer-renderer file in `src/components/werke/roentgen/layers/` (ShanghaiLayers, MobilityHubLayers, SenLayers, VWHopeLayers). No shared base — each project authors its own visual grammar from the same 1600×900 viewBox.
