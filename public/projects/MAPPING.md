@@ -1,86 +1,100 @@
 # Projekt-Bild-Mapping
 
-Quelle: 50 AVIF-Thumbnails (311×233, eines mit 474×375) aus dem `tsimg.cloud`-CDN
-von bachschuster.de. Felix hat sie initial in `public/` gedroppt.
+**Stand: 2026-05-14 (W1, Block 5).** 50 AVIF-Thumbnails (311×233, eine in 474×375)
+aus dem bachschuster.de-Bild-CDN sind jetzt vollständig auf 16 Projekte +
+ein generisches Methode-Asset + ein Logo verteilt.
 
-Strategie: Cross-Referenz mit den Bildhash-URLs auf der **Architektur-Seite**
-(https://bachschuster.de/architektur) und den jeweiligen Projekt-Galerien.
+## Quellen
 
-Methodik:
-1. Raw HTML von `/architektur` gefetched
-2. Aller 40-stelligen Hex-Hashes per Regex extrahiert (= Cover-Images, 18 Projekte)
-3. WebFetch mit LLM zusätzlich für die Gallery-Hashes pro Projekt (3 weitere pro Projekt)
-4. Meine AVIFs gegen die Gallery-Hashes gematcht — **36 von 50 zuordbar**
+Die Bilder stammen aus zwei verschiedenen Bereichen auf bachschuster.de:
 
-## Was wo liegt
+1. **`/architektur`** — 18 Architektur-Projekte in den Kategorien Privatbauten,
+   Geschäftsbauten und Öffentlicher Raum. **Auto-Match per Hash:** 36 von 50
+   Bildern für 12 Projekte.
+2. **`/strukturplanung`** (Tab „Projekte") — 5+ Strukturplanungs-Projekte.
+   **Manuelle Zuordnung durch Felix:** 12 Bilder für 4 Projekte. Plus
+   ein eigenständiges Strukturplan-Diagramm (kein Projekt).
 
-| Slug | Projekt | Bilder | Hinweise |
+Insgesamt **16 Projekte mit je 3 Galerie-Bildern**. Die Cover-Hero-Bilder
+(eines pro Projekt) sind in diesem Batch jeweils noch nicht enthalten.
+
+## Master-Prompt-Projekte (§6.3) — Bilder-Status
+
+| Master-Prompt-Projekt | Folder | Bilder | Status |
 |---|---|---|---|
-| `westpark-verbindungssteg/` | WestPark Verbindungssteg (Ingolstadt, 2021) | 3 | **Master-Prompt-Projekt #1.** Cover (`b754f945…`) fehlt. |
-| `exhibition-center-chongming-shanghai/` | Exhibition Center Resort Chongming Island Shanghai (2012/2013) | 3 | Cover (`f07010d0…`) fehlt. |
-| `mobile-space-deutschlandjahr-indien/` | Mobile Space — Deutschlandjahr Indien (2012/2013) | 3 | Cover (`af821fff…`) fehlt. |
-| `kunst-kultur-donau-ingolstadt/` | Kunst und Kultur an der Donau (Ingolstadt, 2019) | 3 | Cover (`bb54ad7f…`) fehlt. |
-| `vereinsgebaeude-ruderclub/` | Vereinsgebäude Ruderclub (2023) | 3 | Cover (`8e29a8f5…`) fehlt. |
-| `edeka-markt-eichenau/` | Edeka Markt Eichenau (2019) | 3 | Cover (`cf560655…`) fehlt. |
-| `buero-entwicklung-ingolstadt-2022/` | Büro-/Entwicklungs-/Verwaltungsgebäude (Ingolstadt, 2022, LEED Gold) | 3 | Cover (`fe97d28e…`) fehlt. |
-| `autohaus-dollnstein/` | Autohaus Dollnstein (2000) | 3 | Cover (`405f6b9e…`) fehlt. |
-| `forsthaus-bettbrunn/` | Forsthaus Bettbrunn (2023, Holzbau, –45 % Energie) | 3 | Cover (`744e6e70…`) fehlt. |
-| `einfamilienhaus-ingolstadt-2023/` | Einfamilienhaus Ingolstadt 2023 (Heimkino, Spa, Weinkeller) | 3 | Cover (`8aba2321…`) fehlt. |
-| `einfamilienhaus-ingolstadt-2020/` | Einfamilienhaus Ingolstadt 2020 | 3 | Cover (`3d01377a…`) fehlt. |
-| `einfamilienhaus-ingolstadt-2016/` | Einfamilienhaus Ingolstadt 2016 | 3 | Cover (`c295041e…`) fehlt. |
-| `_unsorted/` | 13 unsortierte Bilder | 13 | s.u. |
+| WestPark Verbindungssteg | `westpark-verbindungssteg/` | 3 ✓ | Cover fehlt |
+| Pavillion of Innovation (Shanghai EXPO 2010) | — | **0** | komplett fehlend |
+| **Mobility Hub Ingolstadt** | `mobility-hub-ingolstadt/` | 3 ✓ | **NEU verfügbar dank Felix' Sort** |
+| Sen Friedenszentrum Thái Bình | — | **0** | komplett fehlend |
+| 5. Projekt (Felix-Wahl, idealerweise Johannesburg/Dubai/Indien/Brasilien) | `vw-hope-academy-suedafrika/` oder `mobile-space-deutschlandjahr-indien/` | 3 ✓ | **Beide Kandidaten verfügbar** |
 
-## Verbleibende 13 unsortierte Hashes
+→ Für W2-Hero brauchen wir keine Projekt-Bilder (Particle-System ist abstrakt).
+→ Für W5 (Werke Index + WestPark Deep Dive) reicht der Bestand teilweise.
+→ Für W6 (Shanghai Pavillon + Sen Friedenszentrum Deep Dive): **kritische Lücke**.
 
-Wahrscheinlich aus diesen sechs Projekten (deren Galerien wir nicht
-vollständig parsen konnten):
+## Komplette Folder-Liste
 
-- Einfamilienhaus Kirchdorf (2015) — 340 m² Hanggrundstück, Licht/Wasser-Elemente
-- Bürogebäude Ingolstadt (2014) — fünfgeschossig, 2 750 m², Kammstruktur
-- Büro- und Verwaltungszentrale Ingolstadt (2005) — –50 % Energie, PV + GW-Wärmepumpe
-- Expo Pavillon Shanghai (2010) — **Master-Prompt-Projekt #2** „Pavillion of Innovation"
-- Architektonische Präsentation Automobil-Markteinführung (2009)
-- Wettbewerb Schwimmwettkampfarena Shandong (2008)
+### Aus `/architektur` (Auto-Match per Hash)
 
-Eine Sonderform: **`cd81eec69e…_w474-h375-cc.avif`** ist mit 474×375 px größer
-als die anderen — wirkt wie ein Hero-Banner, nicht wie ein Galerie-Thumbnail.
-Vermutlich der Visual für eines der Projekte oben.
+| Slug | Projekt | Jahr | Kategorie |
+|---|---|---|---|
+| `westpark-verbindungssteg` | WestPark Verbindungssteg | 2021 | Öffentlicher Raum |
+| `kunst-kultur-donau-ingolstadt` | Kunst und Kultur an der Donau | 2019 | Öffentlicher Raum |
+| `exhibition-center-chongming-shanghai` | Exhibition Center Chongming Island | 2012/2013 | Öffentlicher Raum |
+| `mobile-space-deutschlandjahr-indien` | Mobile Space — Deutschlandjahr Indien | 2012/2013 | Öffentlicher Raum |
+| `vereinsgebaeude-ruderclub` | Vereinsgebäude Ruderclub | 2023 | Öffentlicher Raum |
+| `edeka-markt-eichenau` | Edeka Markt Eichenau | 2019 | Geschäftsbauten |
+| `buero-entwicklung-ingolstadt-2022` | Büro/Entwicklung/Verwaltung Ingolstadt (LEED Gold) | 2022 | Geschäftsbauten |
+| `autohaus-dollnstein` | Autohaus Dollnstein | 2000 | Geschäftsbauten |
+| `forsthaus-bettbrunn` | Forsthaus Bettbrunn (Holzbau, –45 % Energie) | 2023 | Privatbauten |
+| `einfamilienhaus-ingolstadt-2023` | EFH Ingolstadt (Heimkino, Spa, Weinkeller) | 2023 | Privatbauten |
+| `einfamilienhaus-ingolstadt-2020` | EFH Ingolstadt | 2020 | Privatbauten |
+| `einfamilienhaus-ingolstadt-2016` | EFH Ingolstadt | 2016 | Privatbauten |
 
-### Felix — Manuelle Sortierung der 13
+### Aus `/strukturplanung` (manuelle Felix-Zuordnung)
 
-Schnellster Weg: starte `pnpm dev`, öffne `http://localhost:5173/_unsorted.html`
-(sobald wir die Helper-Page gebaut haben — passiert in Block 4 dieser Session
-oder zu Beginn von W2). Dort werden alle 13 Thumbnails als Grid angezeigt,
-du wählst per Dropdown die Projekt-Zuordnung, klickst Export → bekommst eine
-Shell-Move-Liste die ich ausführe.
+| Slug | Projekt | Jahr | Kontinent |
+|---|---|---|---|
+| `mobility-hub-ingolstadt` | Mobility Hub Ingolstadt | 2020 | Europa |
+| `bebauungsplanung-log-homes-berlin` | Bebauungsplanung Log Homes Berlin (32 ha) | 2011–2015 | Europa |
+| `vw-hope-academy-suedafrika` | VW Hope Academy Südafrika | 2006–2009 | **Afrika** |
+| `schwimmwettkampfarena-shandong` | Wettbewerb Schwimmwettkampfarena Shandong | 2008 | **Asien** |
 
-Falls du jetzt schon manuell willst: kopiere die Dateien selbst aus
-`public/projects/_unsorted/` in die richtigen Projektordner.
+### Weitere Drive-Assets (nicht in `public/projects/`)
 
-## Master-Prompt-Projekte vs. bachschuster.de
-
-Der Master-Prompt §6.3 spezifiziert vier Deep-Dive-Projekte für die Pitch-v1:
-
-| Master-Prompt-Slug | Bachschuster.de-Pendant | Bild-Lage |
+| Pfad | Bild | Verwendung |
 |---|---|---|
-| `westpark` | WestPark Verbindungssteg (2021) | 3 Galerie-Bilder ✓, Cover fehlt |
-| `shanghai-pavillion-of-innovation` | Expo Pavillon Shanghai (2010) | Cover bekannt, Galerie evtl. in `_unsorted/` |
-| `mobility-hub` | Mobility Hub Ingolstadt (auf Homepage, **nicht** in /architektur) | **Keine Bilder in den 50 AVIFs** |
-| `sen-friedenszentrum` | Sen Peace Center Thái Bình (auf Homepage, **nicht** in /architektur) | **Keine Bilder in den 50 AVIFs** |
+| `public/brand/logo.avif` | Bachschuster-Logo | Header (W2) |
+| `public/methode/strukturplan-diagram.avif` | Generisches Strukturplan-Diagramm | Methode-Sektion (W4) — kann als Sub-Element neben dem Force-Graph dienen |
 
-→ Für W5–W6 (die Project Deep Dives) brauchen wir **Mobility Hub** und
-**Sen Friedenszentrum** Bilder separat. Plus die Cover für die 12 sortierten.
+## Datei-Schema pro Projekt-Folder
 
-## Auflösung-Limit
+```
+public/projects/{slug}/
+├── 01.avif      ← erste Galerie-Aufnahme
+├── 02.avif      ← zweite Galerie-Aufnahme
+└── 03.avif      ← dritte Galerie-Aufnahme
+```
 
-Alle AVIFs sind **311×233 px** (das eine 474×375 px), das sind
-CDN-Thumbnails. Für Hero-Sektionen und Röntgen-Scroll brauchen wir
-**Full-Res-Originale** — typischerweise 2 000–3 000 px Breite.
-Felix sollte die jeweiligen Originale aus dem Drive-Ordner exportieren wenn
-ein Projekt im Werke-Deep-Dive an die Reihe kommt (W5 für WestPark, W6 für
-die anderen drei).
+VW Hope Academy hat in den Original-Dateinamen `_1` und `_3` (kein `_2`),
+wurde aber für sauberes Numbering auf `01/02/03` normalisiert.
 
----
+## Auflösungs-Limit
 
-*Mapping erstellt: 2026-05-14 (W1), automatisch via WebFetch + Grep auf
-bachschuster.de/architektur. Stand der Quell-Site: Mai 2026.*
+Alle Bilder sind **311×233 px CDN-Thumbnails**. Brauchbar für:
+- ✓ Werke-Index-Grid-Cards (W5) — perfekte Größe
+- ✓ Hover-Previews und kleine Embeds
+- ✗ Hero-Sektionen und Röntgen-Scroll (W5–W6) — **brauchen Full-Res 2000–3000 px**
+
+→ Für Deep Dives in W5–W6 bitte rechtzeitig die Originale aus dem Drive
+beschaffen und in den jeweiligen Projektordner kopieren. Empfehlung:
+parallel `original/` Subfolder, z.B. `westpark-verbindungssteg/original/01.jpg`.
+
+## Was noch fehlt
+
+- [ ] **Sen Friedenszentrum Thái Bình** — komplett, Master-Prompt-Projekt §6.3 #4
+- [ ] **Shanghai Pavillion of Innovation (EXPO 2010)** — komplett, Master-Prompt-Projekt §6.3 #2
+- [ ] **Cover-Hero-Bilder** für alle 16 Projekte (1 pro Projekt, Format 16:9 oder 4:3 für die Index-Grid-Cards)
+- [ ] **Full-Res-Originale** für mindestens die 4 Master-Prompt-Deep-Dives (WestPark, Shanghai, Mobility Hub, Sen)
+- [ ] **Peter-Bachschuster-Portrait** für Team-Sektion (W8)
+- [ ] **Field-Recordings** pro Sektion (W3+) — Stock-Quellen falls keine Originale vorhanden
