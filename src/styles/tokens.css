@@ -1,0 +1,31 @@
+/**
+ * Theme-aware semantic color tokens.
+ * Backed by Tailwind classes like bg-canvas, text-prose, border-rule.
+ * Values are space-separated RGB channels so Tailwind's `rgb(var(...) / <alpha-value>)`
+ * pattern can apply opacity correctly.
+ *
+ * To flip a section's palette, set `data-theme="light"` (or "dark") on an ancestor.
+ */
+
+:root,
+[data-theme='dark'] {
+  --c-canvas: 10 11 14; /* #0A0B0E — bg-ink */
+  --c-canvas-raised: 17 20 26; /* #11141A — bg-surface */
+  --c-prose: 242 237 226; /* #F2EDE2 — text-bone */
+  --c-prose-muted: 155 147 133; /* #9B9385 */
+  --c-prose-faint: 92 90 85; /* #5C5A55 */
+  --c-rule: 30 35 44; /* #1E232C */
+
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --c-canvas: 236 230 216; /* #ECE6D8 — paper */
+  --c-canvas-raised: 244 239 227; /* #F4EFE3 */
+  --c-prose: 26 22 18; /* #1A1612 */
+  --c-prose-muted: 74 69 61; /* #4A453D */
+  --c-prose-faint: 122 117 106;
+  --c-rule: 195 184 165;
+
+  color-scheme: light;
+}

@@ -1,0 +1,19 @@
+/**
+ * Font loading.
+ *
+ * Fraunces & JetBrains Mono ship via @fontsource-variable npm packages
+ * (self-hosted WOFF2, served from our own bundle — no Google Fonts request).
+ *
+ * Switzer is on Fontshare. Pitch-v1 uses their CDN @import; W10 polish
+ * will self-host the WOFF2 + add a preload.
+ */
+
+/* Fraunces — full variable (wght + opsz + soft + wonk axes) */
+@import '@fontsource-variable/fraunces/full.css';
+@import '@fontsource-variable/fraunces/full-italic.css';
+
+/* JetBrains Mono — variable */
+@import '@fontsource-variable/jetbrains-mono/index.css';
+
+/* Switzer (Fontshare CDN) — variable wght 100..900, italic + regular */
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@200,300,400,500,600,700,800,900,201,301,401,501,601,701,801,901&display=swap');

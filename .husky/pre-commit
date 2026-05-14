@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Direct binary call so pnpm 11's deps-status-check doesn't block on
+# the (harmless) ignored-builds warning.
+"./node_modules/.bin/lint-staged"
