@@ -10,13 +10,15 @@ interface ParticleFieldProps {
   count: number;
   /** Single source of truth for uMorph; written by scroll + slider, read here. */
   morphRef: MutableRefObject<number>;
+  /** Drives the collapse-out animation when the hero scroll passes the end. */
+  exitRef: MutableRefObject<number>;
 }
 
 const MORPH_LERP = 0.18;
-/** Duration in seconds for the initial emergence animation. */
+const EXIT_LERP = 0.22;
 const REVEAL_DURATION = 2.5;
 
-export function ParticleField({ count, morphRef }: ParticleFieldProps) {
+export function ParticleField({ count, morphRef, exitRef }: ParticleFieldProps) {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const revealStartRef = useRef<number | null>(null);
   const { gl } = useThree();
@@ -44,6 +46,7 @@ export function ParticleField({ count, morphRef }: ParticleFieldProps) {
         uPointSize: { value: 1.6 },
         uMorph: { value: 0 },
         uReveal: { value: 0 },
+        uExit: { value: 0 },
         uLayerColor0: { value: new THREE.Color('#4D8FBF') }, // data-cyan
         uLayerColor1: { value: new THREE.Color('#D97648') }, // accent-glow
         uLayerColor2: { value: new THREE.Color('#B85C2E') }, // accent-primary
@@ -63,7 +66,6 @@ export function ParticleField({ count, morphRef }: ParticleFieldProps) {
     const mat = materialRef.current;
     if (!mat) return;
 
-    // ── Time advance for curl-noise ──────────────────────────────────
     mat.uniforms.uTime!.value = state.clock.elapsedTime;
 
     // ── Reveal emergence ─────────────────────────────────────────────
@@ -77,9 +79,14 @@ export function ParticleField({ count, morphRef }: ParticleFieldProps) {
     mat.uniforms.uReveal!.value = easeFns.cinematic(revealT);
 
     // ── Morph follow ─────────────────────────────────────────────────
-    const target = morphRef.current;
-    const current = mat.uniforms.uMorph!.value as number;
-    mat.uniforms.uMorph!.value = current + (target - current) * MORPH_LERP;
+    const morphTarget = morphRef.current;
+    const morphCurrent = mat.uniforms.uMorph!.value as number;
+    mat.uniforms.uMorph!.value = morphCurrent + (morphTarget - morphCurrent) * MORPH_LERP;
+
+    // ── Exit collapse ────────────────────────────────────────────────
+    const exitTarget = exitRef.current;
+    const exitCurrent = mat.uniforms.uExit!.value as number;
+    mat.uniforms.uExit!.value = exitCurrent + (exitTarget - exitCurrent) * EXIT_LERP;
   });
 
   return (

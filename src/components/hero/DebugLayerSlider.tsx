@@ -70,7 +70,7 @@ export function DebugLayerSlider({ morphRef }: DebugLayerSliderProps) {
   const t = Math.min(Math.max(display - low, 0), 1);
 
   return (
-    <div className="pointer-events-auto fixed bottom-s4 right-s4 z-50 w-[320px] border border-border-strong bg-ink/85 p-s3 font-mono text-bone-muted backdrop-blur-sm">
+    <div className="pointer-events-auto fixed left-s4 top-s7 z-50 w-[260px] border border-border-strong bg-ink/85 p-s3 font-mono text-bone-muted backdrop-blur-sm sm:left-s5">
       <div className="flex items-baseline justify-between">
         <p className="text-data-label uppercase tracking-data text-bone">Debug · uMorph</p>
         <p className="text-data-label uppercase tracking-data text-accent">{display.toFixed(2)}</p>

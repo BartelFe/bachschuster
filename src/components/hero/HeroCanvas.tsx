@@ -13,6 +13,8 @@ interface HeroCanvasProps {
    * without triggering React re-renders. ParticleField reads + lerps in useFrame.
    */
   morphRef: MutableRefObject<number>;
+  /** Collapse-out animation driver (0..1). Hero exit fade. */
+  exitRef: MutableRefObject<number>;
   /** Mount the post-processing stack. Off on mobile / reduced-motion tiers. */
   enablePostFx: boolean;
   /**
@@ -35,7 +37,13 @@ interface HeroCanvasProps {
  *    iteration window; once FPS sustains below 45 the canvas asks the
  *    section to downgrade the tier.
  */
-export function HeroCanvas({ particleCount, morphRef, enablePostFx, onDecline }: HeroCanvasProps) {
+export function HeroCanvas({
+  particleCount,
+  morphRef,
+  exitRef,
+  enablePostFx,
+  onDecline,
+}: HeroCanvasProps) {
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 50, near: 0.1, far: 100 }}
@@ -58,7 +66,7 @@ export function HeroCanvas({ particleCount, morphRef, enablePostFx, onDecline }:
       ) : null}
       <Suspense fallback={null}>
         <CameraRig />
-        <ParticleField count={particleCount} morphRef={morphRef} />
+        <ParticleField count={particleCount} morphRef={morphRef} exitRef={exitRef} />
         {enablePostFx ? <PostFX /> : null}
       </Suspense>
     </Canvas>

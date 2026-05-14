@@ -1,7 +1,7 @@
 import { Outlet, ScrollRestoration } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
-import { SoundProvider } from '@/components/sound';
+import { SoundProvider, SoundToast } from '@/components/sound';
 import { CustomCursor } from '@/components/cursor/CustomCursor';
 import { useLenis } from '@/lib/lenis';
 
@@ -19,6 +19,7 @@ export function RootLayout() {
         <ScrollRestoration />
       </div>
       <CustomCursor />
+      <SoundToast />
     </SoundProvider>
   );
 }

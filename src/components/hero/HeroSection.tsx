@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { HeroCanvas } from './HeroCanvas';
+import { HeroHeadline } from './HeroHeadline';
+import { SectionTracker } from './SectionTracker';
 import { DebugLayerSlider } from './DebugLayerSlider';
-import { brand } from '@/content/brand';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
+import { useUIStore } from '@/lib/store';
 
 type Tier = 'full' | 'mid' | 'mobile' | 'reduced';
 
@@ -21,7 +23,6 @@ const PARTICLE_COUNT: Record<Tier, number> = {
   reduced: 0,
 };
 
-/** Mobile + reduced tiers skip the composer for the second render pass cost. */
 const POSTFX_ENABLED: Record<Tier, boolean> = {
   full: true,
   mid: true,
@@ -31,27 +32,30 @@ const POSTFX_ENABLED: Record<Tier, boolean> = {
 
 /** Extra scroll distance the section is pinned for, expressed as viewport heights. */
 const PIN_EXTRA_VH = 400; // 400 % extra atop initial 100 vh ⇒ 500 vh total exposure
+/**
+ * Scroll progress at which the morph locks at Layer 4 and the exit-collapse
+ * animation begins. The remaining 15 % of pinned scroll runs the implosion.
+ */
+const EXIT_THRESHOLD = 0.85;
 
 export default function HeroSection() {
   const [tier, setTier] = useState<Tier>('reduced');
+  const [exiting, setExiting] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   /**
-   * The single source of truth for uMorph.
-   *  · ScrollTrigger writes it on every scroll tick (no React re-render).
-   *  · DebugSlider writes it on user drag.
-   *  · ParticleField reads it in useFrame and lerps the uniform toward it.
+   * Drivers for the shader animation, mutated outside React's render cycle.
+   *  · morphRef → uMorph (Layer 0..4)
+   *  · exitRef → uExit (0..1, only in the last 15 % of pin)
    */
   const morphRef = useRef(0);
+  const exitRef = useRef(0);
+  const setCurrentSection = useUIStore((s) => s.setCurrentSection);
 
   useEffect(() => {
     setTier(pickPerformanceTier());
-  }, []);
+    setCurrentSection('hero');
+  }, [setCurrentSection]);
 
-  /**
-   * Tier auto-downgrade on sustained FPS dips. The PerformanceMonitor in the
-   * canvas calls this when frame time goes south. We never auto-upgrade —
-   * once we've decided the device can't keep up, we stay generous.
-   */
   const handleDecline = useCallback(() => {
     setTier((current) => {
       if (current === 'full') return 'mid';
@@ -65,8 +69,6 @@ export default function HeroSection() {
     const section = sectionRef.current;
     if (!section) return;
 
-    // GSAP context auto-collects every ScrollTrigger created inside it so
-    // `ctx.revert()` cleans them up — important for tier downgrade + HMR.
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: section,
@@ -78,16 +80,41 @@ export default function HeroSection() {
         scrub: true,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
-          morphRef.current = self.progress * 4;
+          const p = self.progress;
+          if (p < EXIT_THRESHOLD) {
+            // Linear remap of [0, 0.85] → [0, 4] so morph reaches Conflicts
+            // exactly when the collapse phase begins.
+            morphRef.current = (p / EXIT_THRESHOLD) * 4;
+            exitRef.current = 0;
+          } else {
+            morphRef.current = 4;
+            exitRef.current = (p - EXIT_THRESHOLD) / (1 - EXIT_THRESHOLD);
+          }
+        },
+      });
+
+      // Visibility flag for headline/tracker overlays + sound-section state.
+      // Duck the overlays as the exit collapse takes over, and tell the
+      // SoundProvider to crossfade the drone toward `hero-exit`.
+      ScrollTrigger.create({
+        trigger: section,
+        start: `top+=${EXIT_THRESHOLD * PIN_EXTRA_VH}% top`,
+        end: `+=${(1 - EXIT_THRESHOLD) * PIN_EXTRA_VH}%`,
+        onEnter: () => {
+          setExiting(true);
+          setCurrentSection('hero-exit');
+        },
+        onLeaveBack: () => {
+          setExiting(false);
+          setCurrentSection('hero');
         },
       });
     }, section);
 
-    // Refresh once after mount in case Lenis is still booting.
     ScrollTrigger.refresh();
 
     return () => ctx.revert();
-  }, [tier]);
+  }, [tier, setCurrentSection]);
 
   return (
     <section
@@ -101,6 +128,7 @@ export default function HeroSection() {
           <HeroCanvas
             particleCount={PARTICLE_COUNT[tier]}
             morphRef={morphRef}
+            exitRef={exitRef}
             enablePostFx={POSTFX_ENABLED[tier]}
             onDecline={handleDecline}
           />
@@ -109,17 +137,15 @@ export default function HeroSection() {
         )}
       </div>
 
-      <div className="pointer-events-none relative z-10 flex h-full items-end px-s4 pb-s7 sm:px-s5">
-        <div className="max-w-6xl">
-          <p className="font-mono text-caption uppercase tracking-caption text-bone-muted">
-            {brand.name} · Pitch v1
-          </p>
-          <h1 className="mt-s3 text-balance font-display text-display-hero text-bone">
-            {brand.claim}
-          </h1>
-        </div>
+      <div
+        className={`absolute inset-0 transition-opacity duration-reveal ease-cinematic ${
+          exiting ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <HeroHeadline morphRef={morphRef} />
       </div>
 
+      {tier !== 'reduced' && <SectionTracker morphRef={morphRef} hidden={exiting} />}
       {tier !== 'reduced' && <DebugLayerSlider morphRef={morphRef} />}
     </section>
   );
@@ -128,8 +154,8 @@ export default function HeroSection() {
 /**
  * Static fallback shown when the user has `prefers-reduced-motion: reduce`.
  * A flat SVG skyline silhouette evokes Layer 0 without WebGL, kept editorial
- * (stroke-only, low contrast) rather than skeuomorphic. The HeroSection's
- * headline overlay still renders on top.
+ * (stroke-only, low contrast) rather than skeuomorphic. The HeroHeadline
+ * overlay still renders on top via the HeroSection's normal flow.
  */
 function HeroReducedFallback() {
   return (

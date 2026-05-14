@@ -5,20 +5,18 @@
  * formerly Club-only SplitText, DrawSVG, MorphSVG, Inertia, etc.) ship via
  * the standard `gsap` npm package and are free for commercial use.
  *
- * W1 only registers ScrollTrigger (used by Lenis lockstep). Other plugins
- * register lazily when their feature lands:
- *  · W2 — none additional (R3F drives the hero, GSAP just powers cursor + scroll)
+ * Plugin landings:
+ *  · W1 — ScrollTrigger (Lenis lockstep)
  *  · W3 — SplitText (Hero headline glyph reveal)
- *  · W4 — none additional (d3-force drives the methode graph)
  *  · W5 — DrawSVGPlugin (Röntgen-Scroll wireframes)
  *  · W9 — Flip (project-card → detail page-transition)
  */
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// Sensible default config for our use.
 gsap.config({
   nullTargetWarn: false,
 });
@@ -27,4 +25,4 @@ ScrollTrigger.config({
   ignoreMobileResize: true,
 });
 
-export { gsap, ScrollTrigger };
+export { gsap, ScrollTrigger, SplitText };

@@ -154,9 +154,19 @@ const config: Config = {
           '0%, 100%': { height: '6px' },
           '50%': { height: '16px' },
         },
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        toastIn: {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         eq: 'eq 0.9s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both',
+        'toast-in': 'toastIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both',
       },
     },
   },
