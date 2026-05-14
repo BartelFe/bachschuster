@@ -1,14 +1,10 @@
-import { PageScaffold } from '@/components/layout/PageScaffold';
-import { brand } from '@/content/brand';
+import { MethodeSection } from '@/components/methode/MethodeSection';
 
+/**
+ * /methode — full-screen Strukturplanung Force-Graph. W4 ships the
+ * interactive graph + narrative; W5–6 will add the case-study deep dives
+ * below as supporting evidence.
+ */
 export default function MethodePage() {
-  return (
-    <PageScaffold
-      pretitle="Die Methode"
-      title={brand.methodeSlogan}
-      subtitle="Traditionelle Masterplanung sieht Verkehr, Umweltschutz, Architektur, Zukunft und Stadträume als separate Instanzen. Strukturplanung integriert sie zu einem funktionierenden Gesamtorganismus."
-      weekBadge="Force-Graph-Simulation · Woche 4"
-      theme="light"
-    />
-  );
+  return <MethodeSection />;
 }
