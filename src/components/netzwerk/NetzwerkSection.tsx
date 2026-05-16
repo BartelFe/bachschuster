@@ -3,6 +3,7 @@ import { useUIStore } from '@/lib/store';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { StandortePanel } from './StandortePanel';
 import { R3FErrorBoundary } from '@/components/layout/R3FErrorBoundary';
+import { standorte } from '@/content/standorte';
 
 const NetzwerkGlobe = lazy(() =>
   import('./NetzwerkGlobe').then((m) => ({ default: m.NetzwerkGlobe })),
@@ -96,7 +97,26 @@ export function NetzwerkSection() {
             <p className="mt-s1 font-mono text-data-label uppercase tracking-data text-bone-faint">
               Sun · Live · Day / Night
             </p>
+            <p className="mt-s2 font-mono text-data-label uppercase tracking-data text-bone-faint">
+              {tier !== 'reduced' ? 'Drag · Rotate · Click pin' : 'Reduced view'}
+            </p>
           </div>
+
+          {/* Release-rotation affordance — only visible when a standort is
+              locked. W14 audit-fix: lets users escape the camera-lock and
+              return to free auto-rotation without picking another pin. */}
+          {activeIndex >= 0 && tier !== 'reduced' ? (
+            <button
+              type="button"
+              data-cursor="link"
+              data-magnetic
+              onClick={() => setActiveIndex(-1)}
+              className="group pointer-events-auto absolute right-s4 top-s4 z-10 inline-flex items-center gap-s2 border border-border-strong bg-ink/70 px-s3 py-s2 font-mono text-data-label uppercase tracking-data text-bone-muted backdrop-blur-sm transition-colors duration-hover ease-cinematic hover:border-accent hover:text-accent sm:right-s5 sm:top-s5"
+            >
+              <span aria-hidden="true">×</span>
+              Rotation freigeben
+            </button>
+          ) : null}
 
           {/* Floating bottom-left coordinate readout */}
           <p className="pointer-events-none absolute bottom-s4 left-s4 z-10 font-mono text-coordinates text-bone-faint sm:bottom-s5 sm:left-s5">
@@ -124,8 +144,22 @@ function GlobeFallback() {
   );
 }
 
-/** Static fallback for `prefers-reduced-motion`. SVG world dot-grid + 4 markers. */
+/**
+ * Static fallback for `prefers-reduced-motion`. SVG world dot-grid + 4 markers.
+ *
+ * Pin positions are derived from each standort's lat/lng with the same
+ * equirectangular projection used by `TeaserEarth` on the homepage. That keeps
+ * Ingolstadt (11.43° E) and Linz (14.29° E) visually distinct rather than
+ * landing on identical pixel coordinates as the previous hard-coded layout did.
+ */
 function ReducedFallback() {
+  const W = 720;
+  const H = 320;
+  const PAD = 40;
+  const project = (lat: number, lng: number) => ({
+    x: PAD + ((lng + 180) / 360) * W,
+    y: PAD + ((90 - lat) / 180) * H,
+  });
   return (
     <div className="relative flex h-full items-center justify-center bg-ink p-s5">
       <svg viewBox="0 0 800 400" className="h-auto w-full max-w-3xl text-data-cyan opacity-50">
@@ -135,39 +169,36 @@ function ReducedFallback() {
             <circle cx="10" cy="10" r="1" fill="currentColor" />
           </pattern>
         </defs>
-        <rect x="40" y="40" width="720" height="320" fill="url(#globe-dots)" opacity="0.6" />
+        <rect x={PAD} y={PAD} width={W} height={H} fill="url(#globe-dots)" opacity="0.6" />
         <rect
-          x="40"
-          y="40"
-          width="720"
-          height="320"
+          x={PAD}
+          y={PAD}
+          width={W}
+          height={H}
           fill="none"
           stroke="currentColor"
           strokeWidth="0.6"
           opacity="0.5"
         />
-        {/* Four standort marks */}
-        {[
-          { x: 410, y: 130, label: 'Ingolstadt' },
-          { x: 620, y: 170, label: 'Shanghai' },
-          { x: 470, y: 300, label: 'Johannesburg' },
-          { x: 418, y: 132, label: 'Linz' },
-        ].map((p) => (
-          <g key={p.label}>
-            <circle cx={p.x} cy={p.y} r="6" fill="#D97648" />
-            <circle cx={p.x} cy={p.y} r="14" fill="none" stroke="#D97648" strokeWidth="1" />
-            <text
-              x={p.x + 18}
-              y={p.y + 4}
-              fontSize="10"
-              fill="#F2EDE2"
-              fontFamily="ui-monospace, monospace"
-              letterSpacing="1.5"
-            >
-              {p.label.toUpperCase()}
-            </text>
-          </g>
-        ))}
+        {standorte.map((s) => {
+          const { x, y } = project(s.lat, s.lng);
+          return (
+            <g key={s.city}>
+              <circle cx={x} cy={y} r="6" fill="#D97648" />
+              <circle cx={x} cy={y} r="14" fill="none" stroke="#D97648" strokeWidth="1" />
+              <text
+                x={x + 18}
+                y={y + 4}
+                fontSize="10"
+                fill="#F2EDE2"
+                fontFamily="ui-monospace, monospace"
+                letterSpacing="1.5"
+              >
+                {s.city.toUpperCase()}
+              </text>
+            </g>
+          );
+        })}
       </svg>
     </div>
   );

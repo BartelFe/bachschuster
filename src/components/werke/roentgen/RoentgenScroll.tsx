@@ -276,98 +276,108 @@ export function RoentgenScroll({ layers, slug, photo }: RoentgenScrollProps) {
         </ol>
       </div>
 
-      {/* Stage — central viewer frame holding stacked layers */}
+      {/* Stage — viewer stacked above annotation panel.
+           v2 (W13 narrative-repair): the v1 floated the annotation card to
+           the right of the viewer at top-1/2 — on Strukturplanung layers,
+           the most important stakeholder diagram content lives on the
+           right half and was being occluded. The new layout stacks: viewer
+           on top maintains 16:9 aspect, annotation rail full-width below
+           takes the remaining vertical space. Reads as "edukativ" rather
+           than "cinematic overlay" — the section is information-dense and
+           benefits from the clean stack. */}
       <div
         ref={stageRef}
-        className="absolute inset-0 grid grid-rows-[auto_1fr_auto] place-items-center"
+        className="absolute inset-0 flex flex-col items-center gap-s4 px-s4 pb-s5 pt-s8 sm:px-s5 sm:pt-s9 lg:pl-s9"
       >
-        {/* Empty top spacer (meta lives in absolute layer above) */}
-        <div />
-        <div className="relative flex h-full w-full items-center justify-center">
-          {/* Viewer frame */}
-          <div className="relative aspect-[16/9] w-full max-w-5xl overflow-hidden bg-elevated">
-            {/* Photo overlays (only when present) */}
-            {renderers.map((r, i) =>
-              r.Photo ? (
-                <div
-                  key={`photo-${i}`}
-                  data-photo={i}
-                  className="pointer-events-none absolute inset-0"
+        {/* Viewer frame */}
+        <div className="relative aspect-[16/9] w-full max-w-5xl flex-shrink-0 overflow-hidden bg-elevated">
+          {/* Photo overlays (only when present) */}
+          {renderers.map((r, i) =>
+            r.Photo ? (
+              <div
+                key={`photo-${i}`}
+                data-photo={i}
+                className="pointer-events-none absolute inset-0"
+              >
+                <PhotoArchitektur src={r.Photo} />
+              </div>
+            ) : null,
+          )}
+
+          {/* SVG layers — all stacked, opacity managed by ScrollTrigger */}
+          {renderers.map((r, i) => {
+            const { Component } = r;
+            return (
+              <div
+                key={`layer-${i}`}
+                data-layer={i}
+                className="pointer-events-none absolute inset-0"
+                style={{ opacity: i === 0 ? 1 : 0 }}
+              >
+                <Component className="h-full w-full" />
+              </div>
+            );
+          })}
+
+          {/* Scanner line */}
+          <div
+            ref={scanlineRef}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-1/2 h-px"
+            style={{
+              opacity: 0,
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(184,92,46,0.0) 10%, rgba(184,92,46,0.95) 50%, rgba(184,92,46,0.0) 90%, transparent 100%)',
+              boxShadow: '0 0 24px 4px rgba(217,118,72,0.35)',
+            }}
+          />
+
+          {/* Viewer frame corner ticks — engineering-drawing trim */}
+          <FrameTicks />
+        </div>
+
+        {/* Annotation rail — sits directly under the viewer, full-width */}
+        <aside ref={annotationsRef} className="w-full max-w-5xl flex-1 overflow-hidden">
+          <div className="h-full border-l-2 border-accent bg-ink/60 p-s4 backdrop-blur-sm">
+            <div className="grid gap-s4 md:grid-cols-12">
+              {/* Layer identity — left col on md+, full width below */}
+              <div className="md:col-span-5">
+                <p className="font-mono text-data-label uppercase tracking-data text-accent">
+                  Schicht {String(activeIndex).padStart(2, '0')}
+                </p>
+                <h3
+                  className="mt-s2 font-display text-3xl leading-[0.95] text-bone sm:text-4xl"
+                  style={{ fontVariationSettings: '"opsz" 144, "wght" 380' }}
                 >
-                  <PhotoArchitektur src={r.Photo} />
-                </div>
-              ) : null,
-            )}
+                  {activeLayer?.name ?? ''}
+                </h3>
+                <p className="mt-s1 font-display text-base italic text-bone-muted">
+                  {activeLayer?.tagline ?? ''}
+                </p>
+              </div>
 
-            {/* SVG layers — all stacked, opacity managed by ScrollTrigger */}
-            {renderers.map((r, i) => {
-              const { Component } = r;
-              return (
-                <div
-                  key={`layer-${i}`}
-                  data-layer={i}
-                  className="pointer-events-none absolute inset-0"
-                  style={{ opacity: i === 0 ? 1 : 0 }}
-                >
-                  <Component className="h-full w-full" />
-                </div>
-              );
-            })}
-
-            {/* Scanner line */}
-            <div
-              ref={scanlineRef}
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-1/2 h-px"
-              style={{
-                opacity: 0,
-                background:
-                  'linear-gradient(90deg, transparent 0%, rgba(184,92,46,0.0) 10%, rgba(184,92,46,0.95) 50%, rgba(184,92,46,0.0) 90%, transparent 100%)',
-                boxShadow: '0 0 24px 4px rgba(217,118,72,0.35)',
-              }}
-            />
-
-            {/* Viewer frame corner ticks — engineering-drawing trim */}
-            <FrameTicks />
+              {/* Body copy + data — right col on md+ */}
+              <div className="md:col-span-7">
+                <p className="text-body-m text-bone-muted">{activeLayer?.body ?? ''}</p>
+                {activeLayer?.data && activeLayer.data.length > 0 ? (
+                  <dl className="mt-s4 grid grid-cols-3 gap-s3 border-t border-border-subtle pt-s3">
+                    {activeLayer.data.map((d) => (
+                      <div key={d.label}>
+                        <dt className="font-mono text-data-label uppercase tracking-data text-bone-faint">
+                          {d.label}
+                        </dt>
+                        <dd className="mt-s1 font-display text-lg leading-tight text-bone">
+                          {d.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </div>
-        {/* Annotation rail spans below viewer on small screens; right-anchored on lg+ */}
-        <div className="w-full" />
+        </aside>
       </div>
-
-      {/* Annotation rail — right column on lg+, below viewer on small screens */}
-      <aside
-        ref={annotationsRef}
-        className="pointer-events-none absolute inset-x-s4 bottom-s5 z-20 sm:inset-x-s5 lg:right-s5 lg:top-1/2 lg:max-w-md lg:-translate-y-1/2"
-      >
-        <div className="pointer-events-auto rounded-none border-l-2 border-accent bg-ink/60 p-s4 backdrop-blur-sm">
-          <p className="font-mono text-data-label uppercase tracking-data text-accent">
-            Schicht {String(activeIndex).padStart(2, '0')}
-          </p>
-          <h3
-            className="mt-s2 font-display text-3xl leading-[0.95] text-bone sm:text-4xl"
-            style={{ fontVariationSettings: '"opsz" 144, "wght" 380' }}
-          >
-            {activeLayer?.name ?? ''}
-          </h3>
-          <p className="mt-s1 font-display text-base italic text-bone-muted">
-            {activeLayer?.tagline ?? ''}
-          </p>
-          <p className="mt-s3 text-body-m text-bone-muted">{activeLayer?.body ?? ''}</p>
-          {activeLayer?.data && activeLayer.data.length > 0 ? (
-            <dl className="mt-s4 grid grid-cols-3 gap-s3 border-t border-border-subtle pt-s3">
-              {activeLayer.data.map((d) => (
-                <div key={d.label}>
-                  <dt className="font-mono text-data-label uppercase tracking-data text-bone-faint">
-                    {d.label}
-                  </dt>
-                  <dd className="mt-s1 font-display text-lg leading-tight text-bone">{d.value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-        </div>
-      </aside>
     </section>
   );
 }

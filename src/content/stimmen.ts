@@ -20,6 +20,12 @@ export interface Vortrag {
   /** Display year (cached so timeline grouping doesn't reparse). */
   year: number;
   city: string;
+  /**
+   * Country of the **venue** (where the talk actually took place), NOT the
+   * audience's home country. Talks held in Ingolstadt before a foreign
+   * delegation stay `Deutschland` — record the delegation's origin in
+   * `venue` if it's worth surfacing.
+   */
   country: string;
   /** Geographic region for filter chips. */
   region: Region;
@@ -42,6 +48,7 @@ const REGION_BY_COUNTRY: Record<string, Region> = {
   Österreich: 'europa',
   Irland: 'europa',
   Türkei: 'europa',
+  Großbritannien: 'europa',
   Georgien: 'asien',
   China: 'asien',
   Indien: 'asien',
@@ -170,8 +177,8 @@ export const vortraege: Vortrag[] = [
     date: '2013-06-05',
     year: 2013,
     city: 'London',
-    country: 'Deutschland',
-    region: 'europa',
+    country: 'Großbritannien',
+    region: r('Großbritannien'),
     venue: 'Unternehmer­reise des Bayerischen Wirtschafts­ministeriums · Siemens Crystal',
     title: 'Urbane Architektur und Mobilität',
     topic: 'mobilitaet',
@@ -231,8 +238,8 @@ export const vortraege: Vortrag[] = [
     date: '2009-05-26',
     year: 2009,
     city: 'Ingolstadt',
-    country: 'Portugal',
-    region: r('Portugal'),
+    country: 'Deutschland',
+    region: r('Deutschland'),
     venue: 'AHK Portugal · Portugiesische Delegation',
     title: 'Innovatives Hightech-Gebäude mit richtungsweisender Energietechnik',
     topic: 'klima-energie',
@@ -251,9 +258,9 @@ export const vortraege: Vortrag[] = [
     date: '2009-01-15',
     year: 2009,
     city: 'Ingolstadt',
-    country: 'Indien',
-    region: r('Indien'),
-    venue: 'Delegation aus Pune',
+    country: 'Deutschland',
+    region: r('Deutschland'),
+    venue: 'Delegation aus Pune (Indien)',
     title:
       'Innovatives Hightech Büro- und Produktions­gebäude mit richtungs­weisender Energietechnik',
     topic: 'klima-energie',

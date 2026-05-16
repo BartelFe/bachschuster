@@ -1,17 +1,19 @@
 /**
- * Hand-authored SVG portraits for the team. Each portrait composes:
- *  · Backdrop tile (moss-wall, paper, or sky reference) matching the studio
- *    photo's signature green moss wall.
- *  · Head silhouette + hair shape per `Hair` variant.
- *  · Optional glasses overlay.
- *  · Torso silhouette tinted to the member's dominant outfit colour.
+ * Editorial portrait tiles for the team.
  *
- * Felix's brief 2026-05-16: don't crop the photo, "konstruier die Bilder nach."
- * The line-art is stylised — readable as "an editorial illustration of a
- * person", not as anyone specifically. The match to each member is via the
- * outfit-colour + hair-shape pairing rather than facial likeness, which keeps
- * the portraits Awwwards-grade clean and removes any photo-realism uncanny
- * valley.
+ * v2 (2026-05-16) — Felix flagged the v1 portraits as "spielerische Manschgal"
+ * (playful little caricatures). The current pass replaces eyes / mouth / cute
+ * hair paths with a strict editorial silhouette language:
+ *
+ *  · Backdrop is a single warm-tone rectangle with a faint axonometric grid.
+ *  · Subject is a head-and-shoulders silhouette in three-quarter profile,
+ *    rendered as solid forms (no facial features).
+ *  · Hair, glasses, and outfit are differentiating *shapes*, not portraits.
+ *  · A typographic block at the bottom carries a corner-mark + small mono
+ *    caption — same engineering-drawing trim the rest of the site uses.
+ *
+ * The result reads as "editorial illustration" rather than "cartoon avatar",
+ * matching the Fraunces + JetBrains Mono visual language elsewhere.
  */
 
 import { type SVGProps } from 'react';
@@ -27,203 +29,228 @@ interface TeamPortraitProps extends SVGProps<SVGSVGElement> {
 const OUTFIT_HEX: Record<Outfit, string> = {
   accent: '#B85C2E',
   cyan: '#4D8FBF',
-  environment: '#7BA659',
-  citizens: '#E8C547',
-  bone: '#C2B8A3',
-  dark: '#1A1F28',
+  environment: '#5A7A48',
+  citizens: '#C9A93B',
+  bone: '#9B9385',
+  dark: '#1E232C',
 };
 
-const BACKDROP_HEX: Record<'moss' | 'paper' | 'sky', string> = {
-  moss: '#3B5A38',
-  paper: '#ECE6D8',
-  sky: '#4D8FBF',
+/**
+ * Backdrop palette — warm, low-chroma, editorial. The previous moss-green was
+ * too literal (it referenced the studio photo wall); the v2 palette is
+ * abstract paper-tones that don't try to "look like the office".
+ */
+const BACKDROP_HEX: Record<'moss' | 'paper' | 'sky', { fill: string; grid: string }> = {
+  moss: { fill: '#2A3A2A', grid: '#3D5040' },
+  paper: { fill: '#ECE6D8', grid: '#C2B8A3' },
+  sky: { fill: '#1F2A33', grid: '#2E3E48' },
 };
 
-const HAIR_HEX: Record<Hair, string> = {
-  'short-blonde': '#D9C794',
-  'short-balding': '#5C5A55',
-  'long-blonde': '#D9C794',
-  'long-brown': '#6B4A2E',
-  'short-grey': '#C2B8A3',
-  'long-brown-bangs': '#5C3A22',
-};
-
-const SKIN = '#E6CFB8';
+const SILHOUETTE = '#0A0B0E';
 
 export function TeamPortrait({ hair, glasses, outfit, backdrop, ...rest }: TeamPortraitProps) {
+  const bg = BACKDROP_HEX[backdrop];
   return (
     <svg viewBox="0 0 200 240" preserveAspectRatio="xMidYMid meet" role="presentation" {...rest}>
-      {/* Backdrop tile — tilted to match the studio photo's mosswall frames */}
+      {/* ── Backdrop ────────────────────────────────────────────────── */}
+      <rect width="200" height="240" fill={bg.fill} />
+      {/* Axonometric grid — quiet engineering-drawing texture */}
+      <g stroke={bg.grid} strokeWidth="0.4" opacity="0.5">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <line key={`v-${i}`} x1={20 + i * 20} y1="0" x2={20 + i * 20} y2="240" />
+        ))}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <line key={`h-${i}`} x1="0" y1={20 + i * 20} x2="200" y2={20 + i * 20} />
+        ))}
+      </g>
+
+      {/* Frame ticks — engineering-drawing corner marks */}
+      <g stroke={SILHOUETTE} strokeWidth="0.8" fill="none">
+        <path d="M 4 12 L 4 4 L 12 4" />
+        <path d="M 188 4 L 196 4 L 196 12" />
+        <path d="M 4 228 L 4 236 L 12 236" />
+        <path d="M 188 236 L 196 236 L 196 228" />
+      </g>
+
+      {/* ── Subject ────────────────────────────────────────────────────
+          Bottom-anchored silhouette. The full composition reads as
+          shoulder line + neck + head, with hair + glasses + outfit acting
+          as the differentiating shapes. */}
+
+      {/* Shoulders / torso — a single solid block in the member's outfit colour */}
+      <path d={shoulderPath(outfit)} fill={OUTFIT_HEX[outfit]} />
+
+      {/* A thin top edge of the shoulders in black to separate from the head */}
+      <path d={shoulderTopEdge(outfit)} fill="none" stroke={SILHOUETTE} strokeWidth="1" />
+
+      {/* Head silhouette — solid, no features */}
+      <ellipse cx="100" cy="108" rx="30" ry="36" fill={SILHOUETTE} />
+
+      {/* Hair as a separate silhouette shape on top of the head */}
+      <Hairstyle variant={hair} />
+
+      {/* Glasses — a single horizontal mono-line bar, the only "facial" hint */}
+      {glasses ? (
+        <g>
+          <line
+            x1="76"
+            y1="108"
+            x2="124"
+            y2="108"
+            stroke={BACKDROP_HEX[backdrop].grid}
+            strokeWidth="1.6"
+            strokeLinecap="square"
+            opacity="0.95"
+          />
+          <line
+            x1="100"
+            y1="108"
+            x2="100"
+            y2="108"
+            stroke={BACKDROP_HEX[backdrop].fill}
+            strokeWidth="2.4"
+          />
+        </g>
+      ) : null}
+
+      {/* ── Caption bar (bottom) ──────────────────────────────────────── */}
       <g>
-        <rect
+        <line
+          x1="14"
+          y1="222"
+          x2="60"
+          y2="222"
+          stroke={SILHOUETTE}
+          strokeWidth="0.6"
+          opacity="0.7"
+        />
+        <text
           x="14"
-          y="14"
-          width="172"
-          height="216"
-          rx="2"
-          fill={BACKDROP_HEX[backdrop]}
-          stroke="#0A0B0E"
-          strokeWidth="2"
-          transform="rotate(-3 100 122)"
-        />
-        {backdrop === 'moss' ? <MossTexture /> : null}
-      </g>
-
-      {/* Torso */}
-      <g transform="translate(100 175)">
-        <path d={torsoPath(outfit)} fill={OUTFIT_HEX[outfit]} stroke="#0A0B0E" strokeWidth="1.5" />
-      </g>
-
-      {/* Neck */}
-      <rect x="92" y="120" width="16" height="22" fill={SKIN} stroke="#0A0B0E" strokeWidth="1" />
-
-      {/* Head */}
-      <g>
-        <ellipse cx="100" cy="100" rx="32" ry="38" fill={SKIN} stroke="#0A0B0E" strokeWidth="1.5" />
-        <Hairstyle variant={hair} hairHex={HAIR_HEX[hair]} />
-        {/* Eyes — small dots */}
-        <circle cx="88" cy="98" r="2" fill="#0A0B0E" />
-        <circle cx="112" cy="98" r="2" fill="#0A0B0E" />
-        {/* Mouth — subtle warm line */}
-        <path
-          d="M 89 116 Q 100 121 111 116"
-          fill="none"
-          stroke="#0A0B0E"
-          strokeWidth="1.2"
-          strokeLinecap="round"
-        />
-        {/* Glasses */}
-        {glasses ? <Glasses /> : null}
+          y="231"
+          fontSize="6.5"
+          fontFamily="ui-monospace, monospace"
+          letterSpacing="1.3"
+          fill={SILHOUETTE}
+          opacity="0.7"
+        >
+          PORTRAIT · {hair.replace(/-/g, ' ').toUpperCase()}
+        </text>
       </g>
     </svg>
   );
 }
 
-function torsoPath(outfit: Outfit): string {
-  // Two-tone torso silhouette: shoulders curve outward, then narrow at waist.
-  // Outfit variants nudge the shape slightly so the team isn't visually
-  // homogeneous — bone-wear gets a softer collar, dark gets a sharper edge.
-  if (outfit === 'dark') {
-    return 'M -56 0 L -50 -8 L -22 -20 L 22 -20 L 50 -8 L 56 0 L 56 65 L -56 65 Z';
+/**
+ * Outfit-shape variants — the outline that meets the bottom of the frame.
+ * Each is a distinct geometry so the team reads as five different *figures*,
+ * not five clones with hue swaps.
+ */
+function shoulderPath(outfit: Outfit): string {
+  switch (outfit) {
+    case 'dark':
+      // Sharp lapel-style: angled shoulders, deep V notch.
+      return 'M 0 240 L 0 188 L 56 168 L 88 150 L 100 162 L 112 150 L 144 168 L 200 188 L 200 240 Z';
+    case 'bone':
+      // Softer round neckline — a smooth curve from shoulder to neck.
+      return 'M 0 240 L 0 184 Q 30 168 70 160 Q 88 155 100 168 Q 112 155 130 160 Q 170 168 200 184 L 200 240 Z';
+    case 'accent':
+      // Angular geometric collar — references the architectural diagrams.
+      return 'M 0 240 L 0 186 L 50 166 L 78 158 L 100 172 L 122 158 L 150 166 L 200 186 L 200 240 Z';
+    case 'cyan':
+      // Wide horizontal collar — straight cut.
+      return 'M 0 240 L 0 188 L 70 168 L 100 168 L 130 168 L 200 188 L 200 240 Z';
+    case 'environment':
+      // Rounded scoop with subtle curve.
+      return 'M 0 240 L 0 188 Q 36 172 78 164 Q 100 178 122 164 Q 164 172 200 188 L 200 240 Z';
+    case 'citizens':
+      // Wrapped diagonal — asymmetric drape.
+      return 'M 0 240 L 0 188 L 60 170 L 100 156 L 124 174 L 148 168 L 200 184 L 200 240 Z';
   }
-  if (outfit === 'bone') {
-    return 'M -60 4 Q -56 -12 -20 -22 L 20 -22 Q 56 -12 60 4 L 60 65 L -60 65 Z';
-  }
-  // accent / cyan / environment / citizens — collared jacket profile
-  return 'M -58 0 Q -52 -10 -24 -20 L -10 -16 L 0 -8 L 10 -16 L 24 -20 Q 52 -10 58 0 L 58 65 L -58 65 Z';
 }
 
-function Hairstyle({ variant, hairHex }: { variant: Hair; hairHex: string }) {
-  const stroke = { stroke: '#0A0B0E', strokeWidth: 1.5, fill: hairHex } as const;
+function shoulderTopEdge(outfit: Outfit): string {
+  switch (outfit) {
+    case 'dark':
+      return 'M 0 188 L 56 168 L 88 150 L 100 162 L 112 150 L 144 168 L 200 188';
+    case 'bone':
+      return 'M 0 184 Q 30 168 70 160 Q 88 155 100 168 Q 112 155 130 160 Q 170 168 200 184';
+    case 'accent':
+      return 'M 0 186 L 50 166 L 78 158 L 100 172 L 122 158 L 150 166 L 200 186';
+    case 'cyan':
+      return 'M 0 188 L 70 168 L 100 168 L 130 168 L 200 188';
+    case 'environment':
+      return 'M 0 188 Q 36 172 78 164 Q 100 178 122 164 Q 164 172 200 188';
+    case 'citizens':
+      return 'M 0 188 L 60 170 L 100 156 L 124 174 L 148 168 L 200 184';
+  }
+}
+
+/**
+ * Hair silhouettes as solid black shapes sitting on top of the head ellipse.
+ * Each one is a distinct geometric *gesture* rather than a literal hair-style
+ * — short, parted, swept, long, bobbed. The shape is what disambiguates the
+ * five team members at a glance.
+ */
+function Hairstyle({ variant }: { variant: Hair }) {
   switch (variant) {
     case 'short-blonde':
-      // Short pixie-style cut framing the head
+      // Compact dome with a flick on the right.
       return (
         <path
-          d="M 70 78 Q 72 56 100 56 Q 130 56 132 80 L 130 96 L 124 88 L 120 96 L 112 86 L 104 92 L 96 86 L 88 92 L 80 86 L 76 96 L 70 90 Z"
-          {...stroke}
+          d="M 70 96 Q 72 76 100 72 Q 128 74 132 96 L 130 100 Q 120 84 100 84 Q 80 84 70 100 Z"
+          fill={SILHOUETTE}
         />
       );
     case 'short-balding':
-      // Receding hairline + side hair
+      // Side tufts only — open crown.
       return (
-        <>
-          <path d="M 68 88 Q 70 72 82 70 Q 84 84 84 96 L 70 102 Z" {...stroke} />
-          <path d="M 132 88 Q 130 72 118 70 Q 116 84 116 96 L 130 102 Z" {...stroke} />
-          <path
-            d="M 76 76 Q 88 64 100 68 Q 112 64 124 76"
-            fill="none"
-            stroke="#0A0B0E"
-            strokeWidth="1.2"
-            opacity="0.55"
-          />
-        </>
+        <g fill={SILHOUETTE}>
+          <path d="M 70 100 Q 70 84 82 82 Q 84 92 84 104 L 70 108 Z" />
+          <path d="M 130 100 Q 130 84 118 82 Q 116 92 116 104 L 130 108 Z" />
+        </g>
       );
     case 'long-blonde':
-      // Shoulder-length hair falling on both sides
+      // Long fall on both sides, shoulder-length.
       return (
-        <>
-          <path
-            d="M 68 80 Q 70 56 100 54 Q 130 56 132 80 L 138 140 L 124 130 L 118 96 L 100 92 L 82 96 L 76 130 L 62 140 Z"
-            {...stroke}
-          />
-        </>
+        <path
+          d="M 68 96 Q 70 74 100 70 Q 130 74 132 96 L 140 162 L 124 156 L 118 112 L 100 108 L 82 112 L 76 156 L 60 162 Z"
+          fill={SILHOUETTE}
+        />
       );
     case 'long-brown':
-      // Long parted hair past shoulders
+      // Centre-parted, longer drape.
       return (
-        <>
+        <g>
           <path
-            d="M 66 80 Q 68 54 100 52 Q 132 54 134 80 L 140 150 L 122 140 L 118 96 L 100 86 L 82 96 L 78 140 L 60 150 Z"
-            {...stroke}
+            d="M 66 94 Q 68 72 100 68 Q 132 72 134 94 L 142 170 L 122 164 L 118 112 L 100 102 L 82 112 L 78 164 L 58 170 Z"
+            fill={SILHOUETTE}
           />
           <line
             x1="100"
-            y1="56"
+            y1="72"
             x2="100"
-            y2="86"
-            stroke="#0A0B0E"
-            strokeWidth="0.8"
-            opacity="0.4"
+            y2="102"
+            stroke="#2A2A2A"
+            strokeWidth="0.6"
+            opacity="0.7"
           />
-        </>
+        </g>
       );
     case 'short-grey':
-      // Short cut with side sweep
+      // Side-swept, single sloping curve.
       return (
         <path
-          d="M 70 82 Q 72 58 100 58 Q 128 58 132 80 L 130 92 L 122 88 L 116 94 L 108 88 L 100 92 L 90 88 L 80 94 L 74 88 Z"
-          {...stroke}
+          d="M 70 98 Q 72 78 100 76 Q 128 76 132 96 L 130 102 Q 120 90 100 92 Q 86 92 76 104 Z"
+          fill={SILHOUETTE}
         />
       );
     case 'long-brown-bangs':
-      // Long brown with straight-cut bangs covering forehead
+      // Long with a horizontal block of bangs.
       return (
-        <>
-          <path
-            d="M 66 78 Q 68 54 100 52 Q 132 54 134 78 L 140 150 L 122 140 L 118 96 L 100 86 L 82 96 L 78 140 L 60 150 Z"
-            {...stroke}
-          />
-          {/* Bangs */}
-          <path
-            d="M 72 82 L 80 92 L 92 86 L 100 92 L 108 86 L 120 92 L 128 82 L 128 88 L 100 96 L 72 88 Z"
-            fill={HAIR_HEX['long-brown-bangs']}
-            stroke="#0A0B0E"
-            strokeWidth="1"
-          />
-        </>
+        <g fill={SILHOUETTE}>
+          <path d="M 66 94 Q 68 72 100 68 Q 132 72 134 94 L 142 170 L 122 164 L 118 112 L 100 102 L 82 112 L 78 164 L 58 170 Z" />
+          <path d="M 72 94 L 128 94 L 128 104 L 100 110 L 72 104 Z" />
+        </g>
       );
   }
-}
-
-function Glasses() {
-  return (
-    <g stroke="#0A0B0E" strokeWidth="1.4" fill="none">
-      <circle cx="88" cy="100" r="9" fill="rgba(255,255,255,0.15)" />
-      <circle cx="112" cy="100" r="9" fill="rgba(255,255,255,0.15)" />
-      <line x1="97" y1="100" x2="103" y2="100" />
-      <line x1="79" y1="100" x2="74" y2="98" />
-      <line x1="121" y1="100" x2="126" y2="98" />
-    </g>
-  );
-}
-
-/** A sparse texture overlay on the moss backdrop — hints at the studio wall. */
-function MossTexture() {
-  return (
-    <g transform="rotate(-3 100 122)" opacity="0.5">
-      {Array.from({ length: 26 }).map((_, i) => {
-        const x = 22 + (i % 6) * 28;
-        const y = 26 + Math.floor(i / 6) * 36;
-        const r = ((i * 13) % 5) + 2;
-        return <circle key={i} cx={x} cy={y} r={r} fill="#4D6E48" opacity="0.55" />;
-      })}
-      {Array.from({ length: 14 }).map((_, i) => {
-        const x = 30 + (i % 5) * 34;
-        const y = 60 + Math.floor(i / 5) * 50;
-        const r = ((i * 7) % 4) + 1;
-        return <circle key={`s-${i}`} cx={x} cy={y} r={r} fill="#2E4029" opacity="0.4" />;
-      })}
-    </g>
-  );
 }

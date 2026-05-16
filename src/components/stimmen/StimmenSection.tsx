@@ -126,8 +126,8 @@ export function StimmenSection() {
           <div className="flex flex-col justify-end gap-s4 md:col-span-5">
             <p className="text-body-l text-bone-muted">
               Sechzehn Jahre Strukturplanung auf der Bühne — in Ingolstadt, Berlin, München,
-              Augsburg, Pune, Phnom Penh, Tiflis, Ankara, Shanghai, Innsbruck und Dublin. Jeder
-              Vortrag ist ein Gespräch mit einer anderen Disziplin.
+              Augsburg, London, Pune, Phnom Penh, Tiflis, Ankara, Innsbruck, Kaprun und Dublin.
+              Jeder Vortrag ist ein Gespräch mit einer anderen Disziplin.
             </p>
             <p className="font-mono text-data-label uppercase tracking-data text-bone-faint">
               Filter &nbsp;→&nbsp; Regional fokussieren
@@ -192,21 +192,10 @@ export function StimmenSection() {
           ))}
         </ol>
 
-        {/* ── Placeholder columns ───────────────────────────────────── */}
-        <section className="mt-s9 grid gap-s5 border-t border-border-subtle pt-s7 md:grid-cols-3">
-          <PlaceholderCol
-            pretitle="Publikationen"
-            body="In Vorbereitung. Fach-, Buch- und Konferenz-Beiträge werden zur Pitch-Übergabe verlinkt."
-          />
-          <PlaceholderCol
-            pretitle="Jury & Beiräte"
-            body="Jury-Tätigkeiten in Wettbewerben und Beirat-Mandate werden in Kürze ergänzt."
-          />
-          <PlaceholderCol
-            pretitle="Awards"
-            body="Auszeichnungen und Nominierungen werden zur Pitch-Übergabe gepflegt."
-          />
-        </section>
+        {/* Placeholder columns (Publikationen / Jury / Awards) were removed in
+            W14 audit-fix — empty "— folgt —" panels read as unfinished and
+            undercut the substantial Vorträge timeline above. They'll return
+            once Felix sources the data. */}
       </div>
     </section>
   );
@@ -252,18 +241,6 @@ function VortragRow({ v }: { v: Vortrag }) {
         {TOPIC_LABEL[v.topic]}
       </p>
     </li>
-  );
-}
-
-function PlaceholderCol({ pretitle, body }: { pretitle: string; body: string }) {
-  return (
-    <div>
-      <p className="font-mono text-data-label uppercase tracking-data text-bone-faint">
-        {pretitle}
-      </p>
-      <p className="mt-s2 font-display text-2xl italic text-bone-muted">— folgt —</p>
-      <p className="mt-s2 text-body-s text-bone-muted">{body}</p>
-    </div>
   );
 }
 

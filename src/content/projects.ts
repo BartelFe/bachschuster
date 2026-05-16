@@ -55,6 +55,16 @@ export interface Project {
   images: string[];
   /** Optional Röntgen-Layer set, present only when `featured`. */
   layers?: ProjectLayer[];
+  /**
+   * Editorial pull-quote rendered between the X-ray scroll and the closing
+   * gallery on the deep-dive page. Project-specific — never use a generic
+   * placeholder, otherwise it reads false (e.g. talking about "the bridge"
+   * on the Shanghai page).
+   */
+  pullQuote?: {
+    body: string;
+    attribution: string;
+  };
 }
 
 const CATEGORY_LABEL: Record<ProjectCategory, string> = {
@@ -98,6 +108,10 @@ const westpark: Project = {
   featured: true,
   gridSpan: 4,
   images: ['01.avif', '02.avif', '03.avif'],
+  pullQuote: {
+    body: 'Vor dem Gebäude steht das System. Was du gerade gesehen hast, ist nicht der Steg — es ist der Vertrag, den der Steg materialisiert.',
+    attribution: 'Peter Bachschuster · 2020',
+  },
   layers: [
     {
       index: 0,
@@ -172,6 +186,10 @@ const shanghaiPavillon: Project = {
   gridSpan: 3,
   // Bilder noch nicht im Public-Folder (siehe MAPPING.md). Fallback: methode/strukturplan-diagram.avif.
   images: [],
+  pullQuote: {
+    body: '184 Tage Welt­ausstellung. Was bleibt, ist die Methode — die Schichten unter dem Pavillon waren das eigentliche Exportgut.',
+    attribution: 'Peter Bachschuster · Shanghai 2010',
+  },
   layers: [
     {
       index: 0,
@@ -234,6 +252,10 @@ const mobilityHub: Project = {
   featured: true,
   gridSpan: 3,
   images: ['01.avif', '02.avif', '03.avif'],
+  pullQuote: {
+    body: 'Mobilität nicht als Anhängsel der Stadt, sondern als Rückgrat. Das Gebäude ist die Konsequenz, nicht der Anfang.',
+    attribution: 'Peter Bachschuster · 2023',
+  },
   layers: [
     {
       index: 0,
@@ -307,6 +329,10 @@ const senFriedenszentrum: Project = {
   featured: true,
   gridSpan: 2,
   images: [],
+  pullQuote: {
+    body: 'Drei Lotusblätter, ein Schwerpunkt. Die Architektur löst keinen Konflikt — sie macht ihn anschaubar.',
+    attribution: 'Peter Bachschuster · Thái Bình 2025',
+  },
   layers: [
     {
       index: 0,
@@ -369,6 +395,10 @@ const vwHopeAcademy: Project = {
   featured: true,
   gridSpan: 2,
   images: ['01.avif', '02.avif', '03.avif'],
+  pullQuote: {
+    body: 'Vier Akteure, die 2006 nicht oft an einem Tisch saßen. Die Schule ist die Materialisierung dieses Tischgesprächs.',
+    attribution: 'Peter Bachschuster · Pretoria 2006–2009',
+  },
   layers: [
     {
       index: 0,

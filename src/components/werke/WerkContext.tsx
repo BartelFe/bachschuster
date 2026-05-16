@@ -24,14 +24,18 @@ export function WerkContext({ project }: WerkContextProps) {
   return (
     <section data-theme="light" className="relative bg-paper px-s4 py-s9 text-ink-soft sm:px-s5">
       <div className="mx-auto max-w-[1400px]">
-        {/* Pull quote */}
-        <p className="mb-s8 max-w-3xl font-display text-pull-quote italic text-ink-soft">
-          „Vor dem Gebäude steht das System. Was du gerade gesehen hast, ist nicht der Steg — es ist
-          der Vertrag, den der Steg materialisiert."
-        </p>
-        <p className="mb-s8 font-mono text-data-label uppercase tracking-data text-ink-faded">
-          Peter Bachschuster · zum Verbindungssteg
-        </p>
+        {/* Pull quote — project-specific. Falls back to nothing rather than
+            a generic Verbindungssteg quote that misfires on every other werk. */}
+        {project.pullQuote ? (
+          <>
+            <p className="mb-s4 max-w-3xl font-display text-pull-quote italic text-ink-soft">
+              „{project.pullQuote.body}"
+            </p>
+            <p className="mb-s8 font-mono text-data-label uppercase tracking-data text-ink-faded">
+              {project.pullQuote.attribution}
+            </p>
+          </>
+        ) : null}
 
         {/* Gallery */}
         {hasGallery ? (

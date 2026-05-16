@@ -1,8 +1,10 @@
 import HeroSection from '@/components/hero/HeroSection';
 import { ManifestSection } from '@/components/manifest/ManifestSection';
+import { MethodeTeaser } from '@/components/methode/MethodeTeaser';
 import { WerkeTeaser } from '@/components/werke/WerkeTeaser';
 import { NetzwerkTeaser } from '@/components/netzwerk/NetzwerkTeaser';
 import { StimmenTeaser } from '@/components/stimmen/StimmenTeaser';
+import { KontaktTeaser } from '@/components/kontakt/KontaktTeaser';
 import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
@@ -14,6 +16,11 @@ import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
  * (one less moving part in the well-known R3F + StrictMode + Suspense
  * unmount race). The remaining race-condition exception is contained by
  * the outer `<R3FErrorBoundary>` in RootLayout.
+ *
+ * Section rhythm: Hero (dark/WebGL) → Manifest (paper-light editorial) →
+ * MethodeTeaser (dark, the narrative bridge into Strukturplanung) →
+ * WerkeTeaser (dark/work-grid) → NetzwerkTeaser (dark/globe preview) →
+ * StimmenTeaser (dark/voices) → KontaktTeaser (dark/conversion).
  */
 export default function HomePage() {
   useDocumentMeta(ROUTE_META['/']!);
@@ -21,9 +28,11 @@ export default function HomePage() {
     <>
       <HeroSection />
       <ManifestSection />
+      <MethodeTeaser />
       <WerkeTeaser />
       <NetzwerkTeaser />
       <StimmenTeaser />
+      <KontaktTeaser />
     </>
   );
 }

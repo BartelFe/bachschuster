@@ -30,24 +30,30 @@ export function Earth({ radius = 1, segments = 96, sunDirRef }: EarthProps) {
     () => ({
       uTime: { value: 0 },
       uSunDir: { value: new Vector3(1, 0.2, 0.5).normalize() },
-      uColorLand: { value: new Color('#F2EDE2') },
-      uColorWater: { value: new Color('#1B2C36') },
-      uColorNight: { value: new Color('#070809') },
+      // Land tone slightly warmer + brighter, so the dot-pattern continents
+      // pop more strongly against the cyan oceans now that OrbitControls
+      // gives users free rotation to inspect the surface (W14 audit).
+      uColorLand: { value: new Color('#EFE6D2') },
+      uColorWater: { value: new Color('#162533') },
+      uColorNight: { value: new Color('#060709') },
       uColorTerm: { value: new Color('#D97648') },
-      uContinentDensity: { value: 0.58 },
+      // Continent coverage raised so the abstracted geography reads as
+      // "earth" instead of "abstract sphere" when the user spins it.
+      uContinentDensity: { value: 0.64 },
     }),
     [],
   );
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (!matRef.current) return;
     uniforms.uTime.value = state.clock.elapsedTime;
     // Re-normalize each frame in case parent mutated the ref non-unit
     uniforms.uSunDir.value.copy(sunDirRef.current).normalize();
-    // Slow autorotation around the Y-axis — half an orbit every ~5 minutes
-    if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.02;
-    }
+    // W14: the previous per-mesh `meshRef.current.rotation.y += delta * 0.02`
+    // is gone — OrbitControls now drives auto-rotation from the camera side
+    // so the Earth, pins and arcs can stay stationary in world space and
+    // share a single source of rotational truth. Removes the rotation-
+    // synchronisation drift that used to creep in between the two systems.
   });
 
   return (

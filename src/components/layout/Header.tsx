@@ -31,8 +31,14 @@ export function Header() {
                   data-cursor="link"
                   className={({ isActive }) =>
                     cn(
-                      'transition-colors duration-hover ease-cinematic hover:text-bone',
-                      isActive && 'text-bone',
+                      // Accent underline on active route, soft bone underline on hover.
+                      // The colour-shift alone (text-bone) was too subtle in dark mode
+                      // and the active route blended into hover state. (W15 audit-fix.)
+                      'relative pb-[2px] transition-colors duration-hover ease-cinematic',
+                      'after:pointer-events-none after:absolute after:inset-x-0 after:-bottom-[1px] after:h-px after:origin-left after:scale-x-0 after:transition-transform after:duration-hover after:ease-cinematic',
+                      isActive
+                        ? 'text-bone after:scale-x-100 after:bg-accent'
+                        : 'hover:text-bone hover:after:scale-x-100 hover:after:bg-bone-faint',
                     )
                   }
                 >

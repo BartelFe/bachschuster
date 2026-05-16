@@ -1,15 +1,21 @@
 import {
-  forwardRef,
   Suspense,
   useEffect,
   useMemo,
   useRef,
+  type ComponentRef,
   type MutableRefObject,
-  type ReactNode,
 } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import type { Vector3 } from 'three';
-import { type Group } from 'three';
+import { OrbitControls } from '@react-three/drei';
+import { Vector3 } from 'three';
+
+/**
+ * Drei doesn't directly export the OrbitControls implementation type, but the
+ * forwardRef element ref resolves to it via React's ComponentRef utility. This
+ * avoids needing `three-stdlib` as a direct dependency.
+ */
+type OrbitControlsRef = ComponentRef<typeof OrbitControls>;
 import { Earth } from './Earth';
 import { Atmosphere } from './Atmosphere';
 import { LocationPin } from './LocationPin';
@@ -27,22 +33,35 @@ interface NetzwerkGlobeProps {
 }
 
 const EARTH_RADIUS = 1;
+const CAMERA_DEFAULT_DISTANCE = 3.2;
+const CAMERA_LOCKED_DISTANCE = 2.4;
 
 /**
  * The composed R3F scene.
  *
- *  · `<Earth>` renders the wireframe-dot sphere.
+ * v2 (W14): OrbitControls now own all rotation. Earth and the standort-
+ * group sit motionless in world space; the camera spins around them at
+ * `autoRotateSpeed = 0.4` when no standort is selected, and the
+ * `CameraFly` helper lerps the camera onto the selected standort's
+ * surface-normal ray when one is. This collapses the v1 dual-rotation
+ * setup (Earth.useFrame + RotatingGroup.useFrame + camera) into a single
+ * source of truth and makes the globe user-draggable for the first time.
+ *
+ *  · `<Earth>` renders the wireframe-dot sphere (now stationary).
  *  · `<Atmosphere>` adds the additive rim shell (off on mobile).
- *  · The pins + arcs sit inside a rotating `<group>` that owns the same Y-axis
- *    autorotation as the earth, so they appear glued to the surface.
- *  · `<SunTracker>` polls Date once a second and writes the world-space sun
- *    direction into a shared ref consumed by the earth shader.
- *  · `<CameraFly>` listens to `activeIndex` and tweens the camera target so
- *    a clicked standort rotates into view.
+ *  · Pins + arcs sit in a plain `<group>` — they no longer carry their
+ *    own rotation tween.
+ *  · `<SunTracker>` polls Date once a second and writes the world-space
+ *    sun direction into a shared ref consumed by the earth shader.
+ *  · `<OrbitControls>` is constrained to rotation only (no zoom, no pan),
+ *    bounded polar angles to keep the user out of the poles, with gentle
+ *    damping.
+ *  · `<CameraFly>` listens to `activeIndex` and tweens the camera onto
+ *    the selected standort while disabling autoRotate.
  */
 export function NetzwerkGlobe({ activeIndex, setActiveIndex, tier }: NetzwerkGlobeProps) {
   const sunDirRef = useRef(sunDirectionVec3(new Date()));
-  const groupRef = useRef<Group>(null!);
+  const controlsRef = useRef<OrbitControlsRef | null>(null);
 
   const segments = tier === 'full' ? 128 : tier === 'mid' ? 96 : 64;
 
@@ -70,7 +89,7 @@ export function NetzwerkGlobe({ activeIndex, setActiveIndex, tier }: NetzwerkGlo
 
   return (
     <Canvas
-      camera={{ position: [0, 0.4, 3.2], fov: 36, near: 0.1, far: 100 }}
+      camera={{ position: [0, 0.4, CAMERA_DEFAULT_DISTANCE], fov: 36, near: 0.1, far: 100 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ width: '100%', height: '100%', display: 'block' }}
@@ -83,8 +102,8 @@ export function NetzwerkGlobe({ activeIndex, setActiveIndex, tier }: NetzwerkGlo
         {/* Static earth sphere — shader owns the surface look. */}
         <Earth radius={EARTH_RADIUS} segments={segments} sunDirRef={sunDirRef} />
 
-        {/* Autorotating group owns pins + arcs so they "stick" to surface. */}
-        <RotatingGroup ref={groupRef}>
+        {/* Pins + arcs in a plain stationary group. */}
+        <group>
           {standorte.map((s, i) => (
             <LocationPin
               key={s.city}
@@ -110,44 +129,34 @@ export function NetzwerkGlobe({ activeIndex, setActiveIndex, tier }: NetzwerkGlo
               />
             );
           })}
-        </RotatingGroup>
+        </group>
 
         {tier !== 'mobile' && <Atmosphere earthRadius={EARTH_RADIUS} shellScale={1.085} />}
 
+        <OrbitControls
+          ref={controlsRef}
+          enableZoom={false}
+          enablePan={false}
+          autoRotate={activeIndex < 0}
+          autoRotateSpeed={0.4}
+          enableDamping
+          dampingFactor={0.06}
+          // Keep the user out of polar singularities.
+          minPolarAngle={Math.PI * 0.22}
+          maxPolarAngle={Math.PI * 0.78}
+          // Touch behaviour — single-finger rotate, no two-finger zoom.
+          touches={{ ONE: 0, TWO: 0 }}
+          makeDefault
+        />
+
         <CameraFly
           target={activeIndex >= 0 ? standortVecs[activeIndex]! : null}
-          groupRef={groupRef}
-          standorteCount={standorte.length}
+          controlsRef={controlsRef}
         />
       </Suspense>
     </Canvas>
   );
 }
-
-/**
- * A `<group>` that auto-rotates around Y at the same rate as Earth.tsx, so
- * pins + arcs stay aligned with the sphere surface beneath them.
- */
-const RotatingGroup = forwardRef<Group, { children: ReactNode }>(function RotatingGroup(
-  { children },
-  ref,
-) {
-  const localRef = useRef<Group>(null!);
-  useFrame((_, delta) => {
-    if (localRef.current) localRef.current.rotation.y += delta * 0.02;
-  });
-  return (
-    <group
-      ref={(g) => {
-        localRef.current = g!;
-        if (typeof ref === 'function') ref(g);
-        else if (ref) (ref as MutableRefObject<Group | null>).current = g;
-      }}
-    >
-      {children}
-    </group>
-  );
-});
 
 /** Updates the shared sunDir uniform input ref once per second. */
 function SunTracker({ sunDirRef }: { sunDirRef: MutableRefObject<Vector3> }) {
@@ -161,71 +170,49 @@ function SunTracker({ sunDirRef }: { sunDirRef: MutableRefObject<Vector3> }) {
 }
 
 /**
- * Smoothly rotates the autorotating group so the target standort faces the
- * camera (negative Z in our setup). We undo the group's autorotation by
- * offsetting `rotation.y` toward the inverse longitude of the target.
+ * Lerps the camera onto the selected standort's surface-normal ray.
  *
- * Implementation: each frame, lerp the group's `rotation.y` toward a target
- * angle derived from the target vector's xz plane. When `target == null`
- * (no selection), the group runs its normal autorotation only.
+ * When `target == null` the OrbitControls' built-in auto-rotation runs
+ * unimpeded. When a target is set, we disable autoRotate and tween the
+ * camera position toward `target.normalize() * CAMERA_LOCKED_DISTANCE`,
+ * keeping the orbit-target at origin so OrbitControls' polar/azimuth
+ * machinery stays consistent.
  */
 function CameraFly({
   target,
-  groupRef,
-  standorteCount,
+  controlsRef,
 }: {
   target: Vector3 | null;
-  groupRef: MutableRefObject<Group | null>;
-  standorteCount: number;
+  controlsRef: MutableRefObject<OrbitControlsRef | null>;
 }) {
-  const lockedAngleRef = useRef<number | null>(null);
   const { camera } = useThree();
+  const desiredPosRef = useRef(new Vector3());
 
   useEffect(() => {
-    if (!target) {
-      lockedAngleRef.current = null;
-      return;
-    }
-    // Compute the rotation that brings `target` to face the camera (centred
-    // on −Z). Target's xz angle measured from −Z; we want group.rotation.y
-    // so that the rotated target lands on (0, *, −R). The group's current
-    // autorotation is also rolling — we lock relative to wall time at lock.
-    const targetAngle = Math.atan2(target.x, -target.z); // when group rot=0
-    lockedAngleRef.current = -targetAngle;
+    if (!target) return;
+    desiredPosRef.current.copy(target).normalize().multiplyScalar(CAMERA_LOCKED_DISTANCE);
   }, [target]);
 
-  useFrame((state) => {
-    const g = groupRef.current;
-    if (!g) return;
-    if (lockedAngleRef.current == null) return;
+  useFrame(() => {
+    const controls = controlsRef.current;
+    if (!controls) return;
 
-    // Compute desired y-rotation given autorotation has been ticking, then
-    // lerp toward it. Autorotation continues; lockedAngle adjusts for it.
-    const autoSpin = state.clock.elapsedTime * 0.02;
-    const desired = lockedAngleRef.current + autoSpin;
-    // Wrap-aware shortest-arc lerp
-    let delta = desired - g.rotation.y;
-    delta = ((delta + Math.PI) % (Math.PI * 2)) - Math.PI;
-    g.rotation.y += delta * 0.06;
-
-    // Subtle camera zoom-in when a standort is locked
-    const targetZ = 2.4;
-    camera.position.z += (targetZ - camera.position.z) * 0.04;
-  });
-
-  // Detect explicit "deselect" and ease back to default camera distance.
-  useEffect(() => {
-    if (target !== null) return;
-    const id = window.setInterval(() => {
-      const dz = 3.2 - camera.position.z;
-      camera.position.z += dz * 0.1;
-      if (Math.abs(dz) < 0.01) {
-        camera.position.z = 3.2;
-        window.clearInterval(id);
+    if (target == null) {
+      // Released — let autoRotate run + ease distance back to default if
+      // the previous lock had zoomed in.
+      const dist = camera.position.length();
+      if (Math.abs(dist - CAMERA_DEFAULT_DISTANCE) > 0.005) {
+        const scale = (dist + (CAMERA_DEFAULT_DISTANCE - dist) * 0.06) / dist;
+        camera.position.multiplyScalar(scale);
+        controls.update();
       }
-    }, 16);
-    return () => window.clearInterval(id);
-  }, [target, camera, standorteCount]);
+      return;
+    }
+
+    // Locked — lerp camera onto the target's surface-normal ray.
+    camera.position.lerp(desiredPosRef.current, 0.06);
+    controls.update();
+  });
 
   return null;
 }

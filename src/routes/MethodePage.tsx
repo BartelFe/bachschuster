@@ -1,12 +1,29 @@
+import { MethodeIntro } from '@/components/methode/MethodeIntro';
 import { MethodeSection } from '@/components/methode/MethodeSection';
+import { MethodeCaseStudies } from '@/components/methode/MethodeCaseStudies';
+import { MethodeIIRD } from '@/components/methode/MethodeIIRD';
+import { MethodeManifestSchluss } from '@/components/methode/MethodeManifestSchluss';
 import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
- * /methode — full-screen Strukturplanung Force-Graph. W4 ships the
- * interactive graph + narrative; W5–6 will add the case-study deep dives
- * below as supporting evidence.
+ * /methode — Strukturplanung Deep Dive.
+ *
+ * Order (W13 + W14 audit-fixes):
+ *  1. MethodeIntro — static 3-mode preview ("understand first").
+ *  2. MethodeSection — pinned interactive Force-Graph ("experience second").
+ *  3. MethodeCaseStudies — three proof-by-project mini-cards routing to /werke.
+ *  4. MethodeIIRD — institutional anchor (TUM Heilbronn partnership).
+ *  5. MethodeManifestSchluss — slogan + CTA into /werke.
  */
 export default function MethodePage() {
   useDocumentMeta(ROUTE_META['/methode']!);
-  return <MethodeSection />;
+  return (
+    <>
+      <MethodeIntro />
+      <MethodeSection />
+      <MethodeCaseStudies />
+      <MethodeIIRD />
+      <MethodeManifestSchluss />
+    </>
+  );
 }
