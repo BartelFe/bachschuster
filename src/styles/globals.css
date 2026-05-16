@@ -106,6 +106,58 @@
     cursor: none !important;
   }
 
+  /* Cursor-mode variants — driven by data-cursor on hovered elements,
+     reflected onto the root cursor div via data-cursor-mode. */
+  [data-cursor-mode='link'] > div:first-child {
+    transform: scale(1.15);
+    border-color: rgb(var(--c-prose));
+  }
+  [data-cursor-mode='media'] > div:first-child {
+    width: 44px !important;
+    height: 44px !important;
+    margin-left: -22px !important;
+    margin-top: -22px !important;
+    border-color: theme('colors.accent.DEFAULT');
+    border-width: 1.5px;
+  }
+  [data-cursor-mode='media'] > div:nth-child(2) {
+    width: 6px !important;
+    height: 6px !important;
+    margin-left: -3px !important;
+    margin-top: -3px !important;
+    background-color: theme('colors.accent.DEFAULT');
+  }
+  [data-cursor-mode='data'] > div:first-child {
+    border-radius: 0 !important;
+    transform: rotate(45deg) scale(0.9);
+  }
+
+  /* Subtle press-feedback for any data-cursor button / link */
+  [data-cursor='link']:active,
+  [data-magnetic]:active {
+    transform: scale(0.97);
+    transition: transform 0.12s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Form field underline animation on focus — used by the Kontakt wizard
+     and any future input/textarea that opts in via the bs-field-underline
+     marker class. */
+  .bs-field-underline {
+    background-image: linear-gradient(
+      to right,
+      theme('colors.accent.DEFAULT') 0%,
+      theme('colors.accent.DEFAULT') 100%
+    );
+    background-position: 0 100%;
+    background-size: 0% 2px;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .bs-field-underline:focus-within,
+  .bs-field-underline:focus {
+    background-size: 100% 2px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

@@ -63,6 +63,37 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-16 · W9 · Audio + Loading + Transitions + Micro-interactions
+
+**Decision:** Curtain-wipe page transitions driven by GSAP timeline inside a `<PageTransition>` wrapper around `<Outlet />` — no Framer Motion.
+**Reason:** GSAP is already the project's animation grammar; adding Framer Motion just for AnimatePresence would land a 60+ KB chunk for one feature. The custom timeline runs cover (0.55 s power3.in) → covered-dwell (0.18 s) → reveal (0.7 s power3.out), with the page content fading out + back in around the curtain. The dwell phase is critical: it gives R3F instances (Hero canvas, Globe) the frame budget they need to dispose cleanly before React detaches the DOM — which mitigates the long-standing R3F + Suspense + StrictMode `removeChild` error on SPA nav from Home → any other route. We can re-evaluate Framer Motion if a future week needs more declarative entry/exit timelines per route.
+
+**Decision:** Loading screen uses plain `setInterval` + CSS transitions, NOT GSAP.
+**Reason:** The loader runs BEFORE the rest of the app's RAF-driven layers (Lenis, R3F) settle. During build + verification we observed a startup race where Lenis's `gsap.ticker.add` could starve fresh GSAP tweens of frames in some throttled/inactive contexts. Plain `setInterval` + CSS `transition` is deterministic, framework-agnostic, and removes the loader from any chain of inter-library dependencies. The counter uses a manual ease-out curve (`1 - (1-t)²`) over 30 ticks to feel non-linear without an easing library.
+
+**Decision:** Loading screen shows once per tab via `sessionStorage.bs-loaded`, NOT once per session.
+**Reason:** Per-session would trigger on every route change inside the SPA (since RootLayout doesn't unmount, but a back-button to home from `/werke` might cause a re-mount). Per-tab means the visitor sees the brand mark once on first paint, and never again during their browsing session — including via SPA back-button. Cleared automatically when the tab closes.
+
+**Decision:** Audio layer extends the existing Web-Audio drone with two new procedural layers (`paperRustle` for Manifest, `methodeTicks` for Methode + Strukturplanung).
+**Reason:** The master prompt §3.6 calls out section-specific ambients (paper rustle, mechanical ticks). We have no audio assets. Procedural synthesis from the existing AudioContext produces convincing-enough layers with zero asset weight: paper = bandpass-filtered noise + chaotic LFO; ticks = sparse 120 Hz exponential-decay clicks scheduled at 1.5–4 s random intervals. Same `AmbientLayer` interface as the drone — SoundProvider mixes all three per section with `paperVolumeFor` + `tickVolumeFor` helpers parallel to `droneVolumeFor`. Felix can later swap any layer for a Howler-backed file without changing the SoundProvider call-sites.
+
+**Decision:** ScrollProgress bar uses `gsap.quickTo` driven by a ScrollTrigger, sits at top edge (`fixed inset-x-0 top-0 z-[150] h-[2px]`), terrakotta.
+**Reason:** Pitch-grade sites get a scroll-progress affordance — gives the visitor a sense of depth in long sections (Hero pin, Werke index, Stimmen timeline). 2 px is invisible until you look for it; terrakotta-on-ink reads as deliberate brand-marking, not browser-chrome. quickTo + ScrollTrigger ensures 60 fps without React state.
+
+**Decision:** Cursor mode variants implemented in `globals.css` via attribute selectors on `[data-cursor-mode=...]`, not in the CustomCursor JSX.
+**Reason:** Keeps the JSX clean (CustomCursor stays a 4 px dot + 24 px ring with the magnetism logic), and the variant styling is declarative: `link` scales the ring 1.15× + brightens border; `media` enlarges the ring to 44 px + tints accent + fills the inner dot; `data` rotates 45° into a diamond. New modes can be added with a single CSS rule.
+
+**Decision:** Global press-feedback (`scale(0.97)` on `:active`) applied via CSS to any `[data-cursor=link]` or `[data-magnetic]` element.
+**Reason:** Modern click affordance without per-component wiring — every magnetic / link-cursor element gets it for free. 120 ms `ease.punchy` matches the site's button-feedback expectations.
+
+**Decision:** Form-field underline animation is CSS-only via `.bs-field-underline` opt-in class.
+**Reason:** The Kontakt wizard inputs already use a `border-b` underline with `focus:border-accent`. The CSS class extends that with a 0%→100% horizontal sweep when the field receives focus (`background-size` transition on a gradient image). Opt-in so other inputs (e.g. the Werke filter) don't accidentally get it.
+
+**Decision:** Vite dev server moved from default 5173 → 5180 in `vite.config.ts`.
+**Reason:** Felix's sibling project (Jakob-Bader) often holds 5173/5174. Without an explicit higher port, Vite's auto-bump puts bachschuster on whichever port is free, breaking the preview-tool's launch.json pointer at 5174. 5180 is sufficiently isolated from common dev defaults. `strictPort: false` keeps the fallback intact.
+
+---
+
 ## 2026-05-16 · W8 · Stimmen + Team + Kontakt-Wizard
 
 **Decision:** Vorträge timeline = year-grouped, region-filterable, no separate detail pages.
