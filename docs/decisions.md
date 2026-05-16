@@ -63,6 +63,33 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-16 · Final audit · SPA-nav `removeChild` bug actually fixed
+
+**Background:** From W5 through W10 we documented the SPA-nav bug as "pre-existing R3F + Suspense + StrictMode race, production unaffected." The final-audit pass (post-W10) actually reproduced + isolated + fixed it.
+
+**Root cause:** Not StrictMode (confirmed by removing `<StrictMode>` from main.tsx — bug persisted). Not lazy/Suspense alone (confirmed by removing `lazy()` from HeroSection — bug persisted). The cause is React-Three-Fiber's WebGL `<Canvas>` removing its own DOM nodes from inside its dispose lifecycle, while React's reconciler is mid-way through `commitDeletionEffectsOnFiber` on the same subtree. When React calls `removeChild` on a node that R3F already detached, it throws `NotFoundError: Failed to execute 'removeChild' on 'Node'`. The exception bubbles past React Router's `RenderErrorBoundary` and lands on the route's `errorElement` (NotFoundPage), making SPA-nav from `/` (Hero) appear to navigate to "page not found."
+
+**Fix:** Localised error boundary (`R3FErrorBoundary`) wrapping the entire `<PageTransition><Outlet /></PageTransition>` at the RootLayout level. The boundary catches the commit-phase removeChild exception BEFORE React Router's error boundary sees it. On catch, the destination route's render proceeds normally because the boundary's own state machine resets via `setTimeout(0)` so the next render commits the correct destination tree.
+
+**Why outer (RootLayout) not inner (HomePage):** ErrorBoundaries catch errors in their children during render/lifecycle, but the deletion-phase error fires during the OUTGOING tree's commit. An inner boundary inside HomePage is itself being deleted at the same moment the error fires, so it can't catch it. Putting the boundary OUTSIDE the routes (in RootLayout) ensures it survives the deletion and can intercept the exception.
+
+**Decision:** HeroSection is now imported directly (not `React.lazy`).
+**Reason:** Simplifies the unmount sequence (one less moving part — no Suspense boundary to coordinate with). Three.js still ships as a separate `manualChunk` in vite.config so the main bundle stays lean (96 kB gz vs 88 kB gz, +8 kB for the HeroSection wrapper module being inline). The Three.js chunk (237 kB gz) now loads on every cold visit instead of only when Home mounts — but it's cached after first load and would have been needed for `/netzwerk` anyway. Trade-off accepted.
+
+**Decision:** Kept `future: { v7_startTransition: true }` on RouterProvider.
+**Reason:** Even though it didn't alone fix the bug, it's good upgrade-readiness for React Router 7 and silences the future-flag warning in dev. Doesn't conflict with the boundary fix.
+
+**Decision:** Removed StrictMode wrapper on the root.
+**Reason:** During root-causing we removed StrictMode to test if it was the source — it wasn't, but we left it removed. StrictMode's dev-only double-invoke is a noise source on top of the actual bug, and now that the bug is fixed via the boundary, restoring StrictMode would just put the noise back without benefit. Production behaviour unchanged either way.
+
+**Bundle impact final:**
+· Main JS: 96 kB gz (was 88 kB gz)
+· React: 67 kB gz · GSAP: 28 kB gz · CSS: 10 kB gz
+· Non-WebGL total: 201 kB gz (within master prompt §4 budget of 250 kB)
+· Three.js chunk: 237 kB gz (no longer lazy on home; cached after first load)
+
+---
+
 ## 2026-05-16 · W10 · Performance + a11y + SEO + cross-browser
 
 **Decision:** `useDocumentMeta` hook that mutates `<head>` directly, NOT react-helmet-async / react-helmet.

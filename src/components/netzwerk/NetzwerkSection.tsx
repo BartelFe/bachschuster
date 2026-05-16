@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useUIStore } from '@/lib/store';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { StandortePanel } from './StandortePanel';
+import { R3FErrorBoundary } from '@/components/layout/R3FErrorBoundary';
 
 const NetzwerkGlobe = lazy(() =>
   import('./NetzwerkGlobe').then((m) => ({ default: m.NetzwerkGlobe })),
@@ -73,13 +74,15 @@ export function NetzwerkSection() {
               fallback dimensions. */}
           <div className="absolute inset-0">
             {tier !== 'reduced' ? (
-              <Suspense fallback={<GlobeFallback />}>
-                <NetzwerkGlobe
-                  activeIndex={activeIndex}
-                  setActiveIndex={setActiveIndex}
-                  tier={tier}
-                />
-              </Suspense>
+              <R3FErrorBoundary fallback={<ReducedFallback />}>
+                <Suspense fallback={<GlobeFallback />}>
+                  <NetzwerkGlobe
+                    activeIndex={activeIndex}
+                    setActiveIndex={setActiveIndex}
+                    tier={tier}
+                  />
+                </Suspense>
+              </R3FErrorBoundary>
             ) : (
               <ReducedFallback />
             )}
