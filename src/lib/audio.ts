@@ -116,8 +116,9 @@ export const DRONE_VOLUME_BY_SECTION: Record<string, number> = {
   'werk-roentgen': 0.3,
   'netzwerk-teaser': 0.16,
   netzwerk: 0.28,
-  stimmen: 0,
-  team: 0,
+  'stimmen-teaser': 0.1,
+  stimmen: 0.14,
+  team: 0.08,
   kontakt: 0,
 };
 

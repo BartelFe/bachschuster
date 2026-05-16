@@ -1,12 +1,9 @@
-import { PageScaffold } from '@/components/layout/PageScaffold';
+import { StimmenSection } from '@/components/stimmen/StimmenSection';
 
+/**
+ * /stimmen — Editorial Vorträge timeline. Publikationen / Jury / Awards
+ * placeholders ship as "folgt"-blocks; the timeline carries 28 real talks.
+ */
 export default function StimmenPage() {
-  return (
-    <PageScaffold
-      pretitle="Stimmen"
-      title="Vorträge, Publikationen, Jury, Awards."
-      subtitle="Vertikale Timeline mit Filter — Wir lesen das Büro als Journal, nicht als Lebenslauf."
-      weekBadge="Timeline-Layout · Woche 8"
-    />
-  );
+  return <StimmenSection />;
 }

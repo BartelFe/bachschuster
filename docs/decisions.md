@@ -63,6 +63,37 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-16 · W8 · Stimmen + Team + Kontakt-Wizard
+
+**Decision:** Vorträge timeline = year-grouped, region-filterable, no separate detail pages.
+**Reason:** 29 talks across 17 years is enough to fill a scroll without per-talk modals. The year-band header creates rhythm; the region filter (Deutschland / Europa / Asien) lets the visitor narrow to their relevance in one click. Per-talk detail pages would inflate scope and add dead-end nav for what is, content-wise, a 2-line vortrag entry.
+
+**Decision:** Publikationen / Jury & Beiräte / Awards render as "in Vorbereitung — folgt"-blocks rather than getting dropped from the page.
+**Reason:** Bachschuster doesn't currently publish either set; dropping the columns would leave Stimmen as "just Vorträge" and miss the master-prompt §6.6 intent of the page being the firm's curriculum. Three editorial placeholder columns signal the intended completeness while remaining honest about today's data gap. Felix can append entries to the empty arrays in `stimmen.ts` post-pitch.
+
+**Decision:** Team portraits = stylised hand-built SVG composites, NOT photo crops.
+**Reason:** Felix's brief 2026-05-16: "darauf basierend die Bilder der Team mitglieder nachkonstruierst." The team photo on `public/teamfoto.avif` is a tilted-mosswall studio composite that would look out of place if cropped into circular avatars on the dark editorial site. Stylised SVG portraits (head silhouette + hair shape + glasses + outfit-coloured torso, all on a moss-textured backdrop tile) match the rest of the site's "we draw what we mean" aesthetic — and don't claim photographic likeness, which removes any uncanny-valley risk. Each member's matchback is via outfit colour + hair shape derived from the photo (e.g. Melanie's accent-orange dress, Peter's green polo, Vera's long brown bangs).
+
+**Decision:** Peter Bachschuster is on the Team page as Hero, not in the cards grid.
+**Reason:** He's the principal — placing him in a 3-column grid alongside team members would understate the position. Split layout: principal hero band (portrait + long bio + Ewald-Kluge family-heritage) then a 5-card grid for the colleagues, then the Soziales-Engagement block.
+
+**Decision:** Soziales Engagement (Victory Kindergarten Ukunda + Ewald Kluge e.V.) lives at the bottom of the Team page in light-mode, not as its own route.
+**Reason:** Soziales attaches to Peter's biography (Rotary Ingolstadt-Kreuztor membership) and the Ewald-Kluge heritage already in the Team hero. Splitting it out would orphan it; a tonal break to bg-paper (matches the Manifest section's editorial-light pattern) frames it as the natural conclusion of "wer wir sind."
+
+**Decision:** Kontakt-Wizard = 5-step form with mailto: submit, no backend.
+**Reason:** Pitch v1 lives on Vercel without server functions. A real form would require Resend/Formspree wiring + an env var; a mailto: link lands the user one click from sending in their own client and uses zero infra. The collected briefing prefills the subject + body so info@bachschuster.de receives a structured message rather than "hi please call me." Post-pitch upgrade path: swap `window.location.href = mailto:…` for a fetch() to a Vercel function and keep the same form-state shape.
+
+**Decision:** Kontakt-Wizard validation is local + permissive (name + valid-looking email + 10-char brief).
+**Reason:** Hot leads bouncing off an over-aggressive validator is worse than a few off-spec submissions. The regex `/.+@.+\..+/` catches obvious typos without rejecting unicode TLDs or company domains. The 10-char minimum on the brief stops empty submissions without forcing essay-length copy.
+
+**Decision:** Footer now carries live local times for all 4 standorte (re-tick every 60 s) + a real counter band citing `projects.length`, `vortraege.length`, `2026 - brand.founded`.
+**Reason:** Pitch-grade footers earn their height. Live-counting numbers from the content layer means the footer can never drift from the rest of the site — adding a project bumps the footer count automatically. The local-time row reinforces the "we work across three continents simultaneously" thesis without needing the user to scroll back up to the Globe.
+
+**Decision:** Dev server port = 5180 (not Vite default 5173 or the prior 5174).
+**Reason:** Felix's other project (Jakob-Bader) often holds 5173+5174; the previous launch.json's port-5174 entry collided with it during W8 verification and stranded the preview server on Jakob-Bader's vite. 5180 is sufficiently far from common dev defaults to avoid future collisions. `strictPort: false` keeps the auto-bump fallback intact for the unlikely case 5180 is also taken.
+
+---
+
 ## 2026-05-15 · W7 · Globe Deep Dive (/netzwerk)
 
 **Decision:** Shader-driven wireframe-dot earth instead of textured photographic basemap.

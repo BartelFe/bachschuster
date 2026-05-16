@@ -19,7 +19,10 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    // 5180 instead of the Vite default 5173 — sidesteps port collisions with
+    // sibling projects (Jakob-Bader's vite often holds 5173/5174 on Felix's
+    // machine). `strictPort: false` keeps the auto-bump fallback intact.
+    port: 5180,
     strictPort: false,
     open: false,
   },

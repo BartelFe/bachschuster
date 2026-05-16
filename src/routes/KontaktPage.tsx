@@ -1,12 +1,9 @@
-import { PageScaffold } from '@/components/layout/PageScaffold';
+import { KontaktWizard } from '@/components/kontakt/KontaktWizard';
 
+/**
+ * /kontakt — Five-step briefing wizard. Submit composes a mailto: URL to
+ * brand.email so the pitch site stays backend-free.
+ */
 export default function KontaktPage() {
-  return (
-    <PageScaffold
-      pretitle="Briefing starten"
-      title="Kein Formular — ein Dialog."
-      subtitle="3-Step-Wizard: Worum geht's → Wo → Wie kontaktieren. Mini-Globe rechts in Step 2, Email-Versand via Resend/Formspree."
-      weekBadge="Briefing-Wizard · Woche 8"
-    />
-  );
+  return <KontaktWizard />;
 }
