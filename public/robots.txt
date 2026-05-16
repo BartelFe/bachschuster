@@ -1,0 +1,8 @@
+# Bachschuster Architektur — robots.txt
+User-agent: *
+Allow: /
+
+# Don't crawl the lazy-loaded WebGL chunk URLs directly
+Disallow: /assets/three-
+
+Sitemap: https://bachschuster.vercel.app/sitemap.xml

@@ -1,9 +1,14 @@
 import { Link, useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { PageScaffold } from '@/components/layout/PageScaffold';
+import { useDocumentMeta } from '@/lib/meta';
 
 export default function NotFoundPage() {
   const error = useRouteError();
   const status = isRouteErrorResponse(error) ? error.status : 404;
+  useDocumentMeta({
+    title: `${status} · Nicht gefunden`,
+    description: 'Diese Sektion existiert nicht.',
+  });
 
   return (
     <PageScaffold

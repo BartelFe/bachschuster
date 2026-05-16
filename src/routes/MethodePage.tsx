@@ -1,4 +1,5 @@
 import { MethodeSection } from '@/components/methode/MethodeSection';
+import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
  * /methode — full-screen Strukturplanung Force-Graph. W4 ships the
@@ -6,5 +7,6 @@ import { MethodeSection } from '@/components/methode/MethodeSection';
  * below as supporting evidence.
  */
 export default function MethodePage() {
+  useDocumentMeta(ROUTE_META['/methode']!);
   return <MethodeSection />;
 }

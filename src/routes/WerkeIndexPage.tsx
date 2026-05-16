@@ -1,4 +1,5 @@
 import { WerkeIndexSection } from '@/components/werke/WerkeIndexSection';
+import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
  * /werke — Editorial portfolio index. W5 ships the asymmetric grid with
@@ -7,5 +8,6 @@ import { WerkeIndexSection } from '@/components/werke/WerkeIndexSection';
  * Hope Academy ship in W6.
  */
 export default function WerkeIndexPage() {
+  useDocumentMeta(ROUTE_META['/werke']!);
   return <WerkeIndexSection />;
 }

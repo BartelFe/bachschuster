@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Top-level routes -->
+  <url><loc>https://bachschuster.vercel.app/</loc><priority>1.0</priority></url>
+  <url><loc>https://bachschuster.vercel.app/methode</loc><priority>0.9</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke</loc><priority>0.9</priority></url>
+  <url><loc>https://bachschuster.vercel.app/netzwerk</loc><priority>0.8</priority></url>
+  <url><loc>https://bachschuster.vercel.app/stimmen</loc><priority>0.7</priority></url>
+  <url><loc>https://bachschuster.vercel.app/team</loc><priority>0.7</priority></url>
+  <url><loc>https://bachschuster.vercel.app/kontakt</loc><priority>0.8</priority></url>
+
+  <!-- Featured deep dives -->
+  <url><loc>https://bachschuster.vercel.app/werke/westpark-verbindungssteg</loc><priority>0.8</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/shanghai-pavillion-of-innovation</loc><priority>0.7</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/mobility-hub-ingolstadt</loc><priority>0.7</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/sen-friedenszentrum-thai-binh</loc><priority>0.7</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/vw-hope-academy-suedafrika</loc><priority>0.7</priority></url>
+
+  <!-- Catalog projects -->
+  <url><loc>https://bachschuster.vercel.app/werke/kunst-kultur-donau-ingolstadt</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/exhibition-center-chongming-shanghai</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/mobile-space-deutschlandjahr-indien</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/vereinsgebaeude-ruderclub</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/edeka-markt-eichenau</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/buero-entwicklung-ingolstadt-2022</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/autohaus-dollnstein</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/forsthaus-bettbrunn</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/einfamilienhaus-ingolstadt-2023</loc><priority>0.4</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/einfamilienhaus-ingolstadt-2020</loc><priority>0.4</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/einfamilienhaus-ingolstadt-2016</loc><priority>0.4</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/bebauungsplanung-log-homes-berlin</loc><priority>0.5</priority></url>
+  <url><loc>https://bachschuster.vercel.app/werke/schwimmwettkampfarena-shandong</loc><priority>0.4</priority></url>
+
+  <!-- Legal -->
+  <url><loc>https://bachschuster.vercel.app/impressum</loc><priority>0.3</priority></url>
+  <url><loc>https://bachschuster.vercel.app/datenschutz</loc><priority>0.3</priority></url>
+</urlset>

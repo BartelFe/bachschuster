@@ -3,6 +3,7 @@ import { ManifestSection } from '@/components/manifest/ManifestSection';
 import { WerkeTeaser } from '@/components/werke/WerkeTeaser';
 import { NetzwerkTeaser } from '@/components/netzwerk/NetzwerkTeaser';
 import { StimmenTeaser } from '@/components/stimmen/StimmenTeaser';
+import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
  * Hero loads as a separate chunk — `three` + `@react-three/*` weigh ~250 KB
@@ -11,6 +12,7 @@ import { StimmenTeaser } from '@/components/stimmen/StimmenTeaser';
 const HeroSection = lazy(() => import('@/components/hero/HeroSection'));
 
 export default function HomePage() {
+  useDocumentMeta(ROUTE_META['/']!);
   return (
     <>
       <Suspense fallback={<HeroLoading />}>

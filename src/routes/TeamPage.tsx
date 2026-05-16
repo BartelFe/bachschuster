@@ -1,4 +1,5 @@
 import { TeamSection } from '@/components/team/TeamSection';
+import { useDocumentMeta, ROUTE_META } from '@/lib/meta';
 
 /**
  * /team — Peter Bachschuster hero + 5-member grid + Soziales-Engagement.
@@ -6,5 +7,6 @@ import { TeamSection } from '@/components/team/TeamSection';
  * the team photo Felix placed at `public/teamfoto.avif`.
  */
 export default function TeamPage() {
+  useDocumentMeta(ROUTE_META['/team']!);
   return <TeamSection />;
 }

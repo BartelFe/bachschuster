@@ -4,6 +4,7 @@ import { WerkHero } from '@/components/werke/WerkHero';
 import { WerkContext } from '@/components/werke/WerkContext';
 import { RoentgenScroll } from '@/components/werke/roentgen/RoentgenScroll';
 import { PageScaffold } from '@/components/layout/PageScaffold';
+import { useDocumentMeta } from '@/lib/meta';
 
 /**
  * /werke/:slug — Deep dive.
@@ -22,6 +23,18 @@ import { PageScaffold } from '@/components/layout/PageScaffold';
 export default function WerkPage() {
   const { slug } = useParams<{ slug: string }>();
   const project = findProject(slug);
+
+  // Per-project meta. For unknown slugs, fall through to generic copy so
+  // the head still gets a sensible title rather than the home default.
+  useDocumentMeta({
+    title: project
+      ? `${project.title}${project.subtitle ? ' · ' + project.subtitle : ''}`
+      : 'Werk nicht gefunden',
+    description: project
+      ? `${project.title}${project.subtitle ? ' — ' + project.subtitle : ''}. ${project.year} · ${project.location}. ${project.summary}`
+      : 'Der angefragte Projekt-Slug existiert nicht im Katalog.',
+    ogType: 'article',
+  });
 
   if (!project) {
     return (

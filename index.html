@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0A0B0E" />
     <meta name="color-scheme" content="dark" />
+    <meta name="author" content="Bachschuster Architektur GmbH" />
+    <meta name="generator" content="Vite + React" />
+    <meta name="robots" content="index, follow" />
 
     <title>Bachschuster Architektur — Vor dem Gebäude, das System.</title>
     <meta
@@ -13,17 +16,98 @@
       content="Bachschuster Architektur: Strukturplanung als Methode vor Architektur. Ingolstadt · Shanghai · Johannesburg · Linz. Seit 1993."
     />
 
+    <link rel="canonical" href="https://bachschuster.vercel.app/" />
+
+    <!-- Open Graph (Facebook, LinkedIn, Pinterest) -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content="Bachschuster Architektur" />
     <meta property="og:title" content="Bachschuster Architektur — Vor dem Gebäude, das System." />
     <meta
       property="og:description"
       content="Strukturplanung als Methode vor Architektur. Ein integriertes Planungs-Manifest aus Ingolstadt."
     />
+    <meta property="og:image" content="https://bachschuster.vercel.app/og.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content="https://bachschuster.vercel.app/" />
 
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Bachschuster Architektur — Vor dem Gebäude, das System." />
+    <meta
+      name="twitter:description"
+      content="Strukturplanung als Methode vor Architektur."
+    />
+    <meta name="twitter:image" content="https://bachschuster.vercel.app/og.svg" />
+
+    <!-- Preconnect to font CDNs so first-paint text doesn't FOUT for long -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.fontshare.com" />
+
+    <!-- Structured data: Organization + key Person (Peter Bachschuster). -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://bachschuster.vercel.app/#organization",
+          "name": "Bachschuster Architektur GmbH",
+          "alternateName": "Bachschuster Architektur",
+          "url": "https://bachschuster.vercel.app",
+          "logo": "https://bachschuster.vercel.app/favicon.svg",
+          "image": "https://bachschuster.vercel.app/og.svg",
+          "description": "Architektur, Stadtplanung und Strukturplanung seit 1993. Hauptsitz Ingolstadt, Operationen in Shanghai, Johannesburg und Linz.",
+          "foundingDate": "1993",
+          "founder": { "@id": "https://bachschuster.vercel.app/#peter-bachschuster" },
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Brodmühlweg 4",
+            "postalCode": "85049",
+            "addressLocality": "Ingolstadt",
+            "addressCountry": "DE"
+          },
+          "telephone": "+49 841 938 33 00",
+          "email": "info@bachschuster.de",
+          "knowsAbout": [
+            "Strukturplanung",
+            "Stadtplanung",
+            "Architektur",
+            "Smart Cities",
+            "Mobilität",
+            "Kreislaufwirtschaft",
+            "Klimagerechtes Bauen"
+          ],
+          "areaServed": [
+            { "@type": "Country", "name": "Deutschland" },
+            { "@type": "Country", "name": "China" },
+            { "@type": "Country", "name": "Südafrika" },
+            { "@type": "Country", "name": "Österreich" }
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://bachschuster.vercel.app/#peter-bachschuster",
+          "name": "Peter Bachschuster",
+          "jobTitle": "Architekt, Stadtplaner, Erfinder der Strukturplanung",
+          "worksFor": { "@id": "https://bachschuster.vercel.app/#organization" },
+          "url": "https://bachschuster.vercel.app/team",
+          "description": "Architekt und Stadtplaner. Erfinder der Strukturplanung. Mitgründer des iiRD (Institut für interdisziplinäre Regionalentwicklung) mit TUM Heilbronn. Seit 1993 international tätig.",
+          "sameAs": ["https://www.linkedin.com/in/peter-bachschuster-85094b61/"]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://bachschuster.vercel.app/#website",
+          "url": "https://bachschuster.vercel.app",
+          "name": "Bachschuster Architektur",
+          "publisher": { "@id": "https://bachschuster.vercel.app/#organization" },
+          "inLanguage": "de"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

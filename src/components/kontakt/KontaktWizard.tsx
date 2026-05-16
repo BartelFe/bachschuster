@@ -52,6 +52,7 @@ const STEPS = [
 
 export function KontaktWizard() {
   const sectionRef = useRef<HTMLElement>(null);
+  const stepBodyRef = useRef<HTMLDivElement>(null);
   const setCurrentSection = useUIStore((s) => s.setCurrentSection);
 
   const [step, setStep] = useState(1);
@@ -66,6 +67,23 @@ export function KontaktWizard() {
     brief: '',
   });
   const [submitted, setSubmitted] = useState(false);
+
+  // A11y: when the step advances, move keyboard focus to the first input
+  // or option button inside the new step. Avoids the user having to Shift+
+  // Tab back from the "Weiter" button after each click.
+  useEffect(() => {
+    if (submitted) return;
+    const body = stepBodyRef.current;
+    if (!body) return;
+    // Defer to next frame so the step's children are mounted.
+    const id = window.requestAnimationFrame(() => {
+      const first = body.querySelector<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled])',
+      );
+      first?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [step, submitted]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -157,7 +175,12 @@ export function KontaktWizard() {
 
         {/* ── Step body ────────────────────────────────────────────── */}
         {!submitted ? (
-          <div className="min-h-[40vh] border-t border-border-subtle pt-s6">
+          <div
+            ref={stepBodyRef}
+            role="group"
+            aria-label={`Schritt ${step} von ${STEPS.length}: ${STEPS[step - 1]?.label}`}
+            className="min-h-[40vh] border-t border-border-subtle pt-s6"
+          >
             {step === 1 && (
               <StepWrap pretitle="01 · Vorhaben" prompt="Worum geht es?">
                 <OptionGrid

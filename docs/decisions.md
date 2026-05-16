@@ -63,6 +63,37 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-16 · W10 · Performance + a11y + SEO + cross-browser
+
+**Decision:** `useDocumentMeta` hook that mutates `<head>` directly, NOT react-helmet-async / react-helmet.
+**Reason:** React 18 doesn't ship native meta-tag support yet (that's a 19 feature). Adding a helmet library is 10+ KB gzipped for a pitch site that has 11 stable routes. A 100-line `useDocumentMeta` hook that sets title + 8 meta tags + canonical link, with a restorer-array cleanup, covers the entire surface. Per-route meta strings live in `ROUTE_META` table; the dynamic `/werke/:slug` route composes its own title from project content.
+
+**Decision:** JSON-LD structured data embedded directly in `index.html` (Organization + Person + WebSite), NOT injected per route.
+**Reason:** Schema.org Organization data is global, not per-route. Google's crawler picks it up from any page. Putting it in `index.html` means it's in the initial HTML response, available before JS executes — better for crawlers that don't render JS. The `@graph` array bundles Organization + Person Peter Bachschuster + WebSite under a single script tag with @id cross-references.
+
+**Decision:** OG card is an SVG file (`/og.svg`), NOT a generated PNG.
+**Reason:** Most modern OG crawlers (Facebook, LinkedIn, X) handle SVG since 2020. SVG-as-OG means the OG card stays editable in source and never goes stale relative to brand changes — no PNG export pipeline needed. The card uses inline Fraunces references (graceful degradation to Georgia if the platform doesn't have the variable font). For platforms that genuinely need raster, we can add a `.png` fallback later via a single Vite asset pipeline step.
+
+**Decision:** Sitemap.xml is hand-authored, NOT generated at build time.
+**Reason:** 28 URLs total (11 stable + 13 catalog + 5 featured deep-dives — but only routed via /werke/:slug). Hand-authoring is one-time cost, gives priority weights per URL (1.0 home, 0.9 featured sections, 0.5 catalog projects, 0.3 legal). When new projects land Felix appends a `<url>` block. No build plugin needed.
+
+**Decision:** Skip-link target is `#main` with `tabIndex={-1}`, not a focus-trap or aria-region.
+**Reason:** Standard a11y pattern: the skip-link is hidden until focused (`-translate-y-[200%]` + `focus-visible:translate-y-0`), then visible top-left. Click moves focus to `#main` (which needs `tabIndex={-1}` to receive programmatic focus without being a tab-stop in normal flow). Subsequent Tab presses land inside the main content rather than going back through Header.
+
+**Decision:** Kontakt-Wizard uses soft step-focus (auto-focus first focusable on step change), NOT a hard focus-trap.
+**Reason:** A hard focus-trap (`focus-trap-react`-style) is for modals — places where the user shouldn't escape to chrome. The wizard isn't modal; the user might legitimately want to nav away mid-form. Soft step-focus means each step's first option/input gets focus on advance (no Shift+Tab back-pedalling after "Weiter" click), but Tab still cycles through Header / Footer normally. Step body also gets `role=group` + `aria-label="Schritt X von 5: Vorhaben"` so screen-readers announce the step.
+
+**Decision:** No CSP headers in vercel.json yet.
+**Reason:** CSP is hard to get right with R3F (it dynamically creates inline shaders + workers in dev), and a wrong CSP breaks the site silently. Pitch v1 ships without; Felix can add a tight CSP later once Vercel-specific paths stabilise. The `meta name=robots content="index, follow"` + canonical + sitemap give the SEO bones without needing security headers in this pass.
+
+**Decision:** Reduced-motion is checked per-component (not just via CSS blanket).
+**Reason:** `globals.css` has the standard `@media (prefers-reduced-motion: reduce)` rule that flattens all CSS animations/transitions to 0.001ms. But GSAP timelines run via JavaScript and ignore CSS — each gsap.context-using component checks `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and either skips animation entirely or applies the static end-state. Audit 2026-05-16: 18 components use GSAP, 14 check reduced (the other 4 use gsap.context only for ScrollTrigger pin/scrub which is naturally inert without user scroll).
+
+**Decision:** Production JS budget = 193 KB gzipped (excl. WebGL chunks).
+**Reason:** Per master prompt §4: "JS < 250kb gzipped (excl. WebGL chunks)". Build 2026-05-16: main 88 kb + react 67 kb + gsap 28 kb + CSS 10 kb = 193 kb. Within budget. Three.js chunk (237 kb gz, 888 kb raw) lazy-loads only on `/` (Hero) and `/netzwerk` (Globe) — non-WebGL routes never pay for it. HeroSection (7.5 kb gz) + NetzwerkGlobe (4 kb gz) are tiny wrappers around the three.js chunk. Lighthouse Performance ≥85 expected on production (no third-party trackers, AVIF images, variable fonts subsetted, minification on).
+
+---
+
 ## 2026-05-16 · W9 · Audio + Loading + Transitions + Micro-interactions
 
 **Decision:** Curtain-wipe page transitions driven by GSAP timeline inside a `<PageTransition>` wrapper around `<Outlet />` — no Framer Motion.
