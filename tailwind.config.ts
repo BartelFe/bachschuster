@@ -97,13 +97,19 @@ const config: Config = {
 
       fontSize: {
         // Display (serif) — clamp ranges from § 3.2.
-        // hero upper bound dropped from 280 → 220 (audit overlap-fix):
-        // on wide displays the v1 280px ascenders punched up into the
-        // SectionTracker label region at top-left. 220px keeps the headline
-        // monumental while clearing the top trim.
+        //
+        // Hero upper bound history:
+        //   v1 (master prompt)    → clamp(120, 14vw, 280)  too large, overlapped trim
+        //   v2 (audit overlap-fix)→ clamp(112, 12vw, 220)  still too large at 1440
+        //   v3 (live review fix)  → clamp(72, 9vw, 144)    current — leaves SectionTracker
+        //                                                   and Intro-überspringen room
+        // The 5-word German claim "Vor dem Gebäude, das System." is too long
+        // to render at 200+ px without dominating the viewport and crowding
+        // the chapter indicator. 144 px max is still monumental Fraunces
+        // display type while letting the top-of-section overlays breathe.
         'display-hero': [
-          'clamp(112px, 12vw, 220px)',
-          { lineHeight: '0.92', letterSpacing: '-0.04em', fontWeight: '300' },
+          'clamp(72px, 9vw, 144px)',
+          { lineHeight: '0.95', letterSpacing: '-0.03em', fontWeight: '300' },
         ],
         'display-section': [
           'clamp(80px, 8vw, 160px)',

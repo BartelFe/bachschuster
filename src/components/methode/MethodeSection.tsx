@@ -5,7 +5,7 @@ import { useUIStore } from '@/lib/store';
 import { ForceGraph } from './ForceGraph';
 import { StakeholderLegend } from './StakeholderLegend';
 import { MethodeNarrative } from './MethodeNarrative';
-import { MODES, modeAtProgress, type ModeId } from './graph-modes';
+import { modeAtProgress, type ModeId } from './graph-modes';
 import type { StakeholderId } from './graph-data';
 
 const PIN_EXTRA_VH = 300;
@@ -68,51 +68,68 @@ export function MethodeSection() {
         <ForceGraph progressRef={progressRef} highlightRef={highlightRef} />
       </div>
 
-      {/* Foreground: pretitle + legend top, narrative right, CTA bottom. */}
-      <div className="pointer-events-none relative z-10 grid h-full grid-rows-[auto_1fr_auto] gap-s5 px-s4 py-s7 sm:px-s5 sm:py-s8">
-        <header className="pointer-events-auto flex flex-col gap-s3 sm:flex-row sm:items-end sm:justify-between sm:gap-s5">
-          {/* Title block sits on top of the canvas — same backdrop-blur
-              treatment as the right-side narrative so dragged stakeholder
-              nodes can't make the headline illegible. (W14 audit overlap-fix.) */}
+      {/*
+        Foreground overlay grid — redesigned post-W10 to eliminate the
+        duplicate-title issue (header.h2 was rendering the same dominant-
+        mode title as MethodeNarrative.h3 → user saw "Strukturplanung
+        tritt ein." twice in different corners) and the
+        narrative-overflow issue (h-screen + auto-rows-1fr-auto was too
+        tight at 1440×900 and clipped the body text).
+
+        New rhythm:
+          row 1 (auto)  — pretitle ONLY (left) · stakeholder legend (right)
+          row 2 (1fr)   — force-graph visible, no overlays here
+          row 3 (auto)  — single focal narrative card (left half) +
+                          editorial footer (right) on one row
+      */}
+      <div className="pointer-events-none relative z-10 grid h-full grid-rows-[auto_1fr_auto] gap-s5 px-s4 py-s5 sm:px-s5 sm:py-s6">
+        {/* ── row 1 — column on mobile, row from sm: so the legend doesn't
+                       crush the subhead on narrow viewports ─────────── */}
+        <header className="pointer-events-auto flex flex-col items-start gap-s3 sm:flex-row sm:justify-between sm:gap-s5">
           <div className="border-l-2 border-accent bg-ink/55 px-s3 py-s2 backdrop-blur-md">
             <p className="font-mono text-caption uppercase tracking-caption text-bone-faint">
               Die Methode
             </p>
-            <h2 className="mt-s2 max-w-2xl font-display text-3xl leading-tight text-bone sm:text-5xl">
-              {MODES[dominantMode].narrative.title}
-            </h2>
+            <p
+              className="mt-s1 font-display text-xl leading-tight text-bone sm:text-2xl"
+              style={{ fontVariationSettings: '"opsz" 144, "wght" 380' }}
+            >
+              Strukturplanung — als Werkzeug.
+            </p>
           </div>
           <StakeholderLegend highlightRef={highlightRef} />
         </header>
 
-        <div className="grid h-full grid-cols-1 items-end gap-s5 sm:grid-cols-12 sm:items-stretch">
-          {/* Spacer to keep the canvas visible on the left while narrative stays right. */}
-          <div className="hidden sm:col-span-7 sm:block" />
-          <div className="pointer-events-auto sm:col-span-5">
+        {/* ── row 2 — graph stays visible, no overlay competing for attention ── */}
+        <div />
+
+        {/* ── row 3 — narrative card LEFT, editorial CTA RIGHT ─────── */}
+        <div className="pointer-events-auto grid grid-cols-1 items-end gap-s4 sm:grid-cols-12 sm:gap-s5">
+          <div className="sm:col-span-7 lg:col-span-6">
             <MethodeNarrative dominantMode={dominantMode} />
           </div>
-        </div>
 
-        <footer className="pointer-events-auto flex flex-wrap items-center justify-between gap-s3 border-t border-border-subtle bg-ink/55 px-s3 py-s4 backdrop-blur-md">
-          <p className="font-mono text-caption uppercase tracking-caption text-bone-muted">
-            Strukturplanung steht <span className="text-accent">vor</span> Stadtplanung und
-            Architektur.
-          </p>
-          <Link
-            to="/werke"
-            data-magnetic
-            data-cursor="link"
-            className="group inline-flex items-center gap-s2 border-l-2 border-accent pl-s3 font-mono text-data-label uppercase tracking-data text-accent transition-colors duration-hover ease-cinematic hover:text-accent-glow"
-          >
-            Erlebe Strukturplanung an einem echten Projekt
-            <span
-              aria-hidden="true"
-              className="transition-transform duration-hover group-hover:translate-x-1"
+          <footer className="flex flex-col gap-s3 sm:col-span-5 sm:items-end sm:text-right lg:col-span-6">
+            <p className="font-mono text-caption uppercase tracking-caption text-bone-muted">
+              Strukturplanung steht <span className="text-accent">vor</span> Stadtplanung und
+              Architektur.
+            </p>
+            <Link
+              to="/werke"
+              data-magnetic
+              data-cursor="link"
+              className="group inline-flex items-center gap-s2 border-l-2 border-accent pl-s3 font-mono text-data-label uppercase tracking-data text-accent transition-colors duration-hover ease-cinematic hover:text-accent-glow"
             >
-              →
-            </span>
-          </Link>
-        </footer>
+              Erlebe Strukturplanung an einem echten Projekt
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-hover group-hover:translate-x-1"
+              >
+                →
+              </span>
+            </Link>
+          </footer>
+        </div>
       </div>
     </section>
   );
