@@ -4,6 +4,118 @@ Decisions outside the master prompt's specification. Newest first.
 
 ---
 
+## 2026-05-16 · W15 · Polish pass (mobile · skip-intro · audio · nav · SEO)
+
+**Decision:** Skip-Intro link in Hero performs a Lenis smooth-scroll to `#manifest`, not a page-jump to `/methode`.
+**Reason:** Audit § 3.1 / § 5.2 both call for a Hero-skip affordance. A `/methode` page-jump would amputate the Methode-Teaser / Werke-Teaser / Netzwerk-Teaser / Stimmen-Teaser / Kontakt-Teaser bridges on the homepage — those exist precisely so a non-Awwwards reader (Peter Bachschuster) gets the entire pitch in one scroll. Smooth-scrolling to `#manifest` preserves that journey while letting the user skip the 500vh pinned WebGL experience. Implementation: new module-level `lenisInstance` singleton in `lib/lenis.ts` + helper `smoothScrollTo(target, opts)` that falls back to native `window.scrollTo({ behavior: 'smooth' })` for prefers-reduced-motion users (who don't get Lenis mounted).
+
+**Decision:** SoundToast moved to bottom-right, threshold raised 64 px → 280 px, dismiss timer 9 s → 7 s.
+**Reason:** Audit § 5.3: "dezenter machen". Bottom-centre + 64 px-threshold triggered while the user was still reading the Hero — interrupting the editorial moment the site is selling. Bottom-right at 280 px puts the nudge in peripheral vision once the user is already engaging with content. Once-per-session via `useUIStore.hasShownSoundToast` was already in place.
+
+**Decision:** Nav active-state in Header now carries an accent underline (`after:` pseudo-element with `scale-x-100 bg-accent`), not just a colour shift to `text-bone`.
+**Reason:** Audit § 5.4: colour-only active state in dark mode was indistinguishable from hover. Underline mechanic mirrors the StimmenFilter chip pattern — consistent grammar for "this is selected" across the site. Hover gets a softer `bone-faint` underline so the affordance still pre-announces the click.
+
+**Decision:** OG image per `/werke/:slug` deep-dive routes to `project.images[0]` when present, otherwise falls back to site-default `/og.svg`.
+**Reason:** Audit § 5.6 flagged identical `/og.svg` previews for every werk as a missed SEO opportunity. Per-werk image gives Slack/Twitter/LinkedIn previews the actual built artefact for Werke that have photos (WestPark, Mobility Hub, VW Hope, the 13 catalog projects). Shanghai + Sen have no photos yet and keep the site default. AVIF is supported by all modern OG crawlers (LinkedIn/Twitter/Slack/Discord since 2022).
+
+**Decision:** Werke index featured-card row-span scales: `row-span-1` on mobile, `row-span-2` from `sm:` upward.
+**Reason:** Audit § 5.1 mobile: v1 always rendered featured cards at row-span-2 with `auto-rows-[clamp(220px,28vw,360px)]`, producing 440+ px tall tiles on 375 px-wide phones. The featured stack on mobile reads as a vertical hero-block train. Single-row on mobile keeps the grid breathing while preserving the wide hero-and-companion layout on tablet+.
+
+**Decision:** Hero Bauchbinden grid stacks dt/dd vertically on mobile, only switches to two-column `auto_1fr` from `sm:` upward.
+**Reason:** Audit § 5.1: locations row ("Ingolstadt · Shanghai · Johannesburg · Linz") overflowed 375 px viewports in the original two-column layout. Stacking on mobile with a smaller dt label keeps the line legible. SectionTracker also reduced its mobile text sizes (`text-lg` h2 instead of `text-2xl`) and capped `max-w-[18rem]` to avoid collision with the Skip-Intro button.
+
+**Decision:** Skipped Lighthouse-CI run; left as a Felix-pre-pitch checklist item.
+**Reason:** No Vercel preview available from this session, and `pnpm preview` against a local dev build doesn't represent production CDN performance. The relevant code paths (idle-check in ForceGraph, OrbitControls update gating, lazy chunks for WebGL) have been reviewed and show no regressions over W10's measured 193 kb gz / 237 kb gz Three.js chunk baseline.
+
+---
+
+## 2026-05-16 · W14 · Methode + Werk page restructure + Netzwerk OrbitControls
+
+**Decision:** `/methode` page now has five sections in sequence: MethodeIntro → MethodeSection (pinned ForceGraph) → MethodeCaseStudies → MethodeIIRD → MethodeManifestSchluss.
+**Reason:** Audit § 4.1: v1 was a single pinned ForceGraph with no overture or follow-through. The new rhythm gives the page beginning/middle/end — preview the three modes statically, experience them interactively, see them resolved in three real projects, anchor in the institutional iiRD partnership, exit on the slogan + CTA to Werke. The page now reads as an essay, not just a toy.
+
+**Decision:** MethodeCaseStudies pulls case data (Akteure / Vorlauf / Ergebnis) from existing `Strukturplanung` layer `data` fields in `src/content/projects.ts`, not from new content.
+**Reason:** The three featured Werke (WestPark, Mobility Hub, VW Hope) already encode this data on their Strukturplanung layer. Surfacing it as case-study mini-cards on /methode is pure layout — zero new prose fabricated, which keeps the content-integrity ledger clean. If Felix adds a 6th case, only the `CASES` constant needs the conflict-sentence; everything else falls through from `projects.ts`.
+
+**Decision:** Werk deep-dive page rhythm is now WerkHero → WerkBrief (paper-light) → WerkTransitionQuote → RoentgenScroll → WerkContext.
+**Reason:** Audit § 4.2 / § 3.3: v1 opened with a text-only hero then jumped to the Röntgen X-ray, which reads architecturally backwards (photo of building should come before its system-layer analysis). New order: photo hero → architectural-magazine briefing in paper-light → transition pull-quote ("Was du gesehen hast ist die Antwort. Was du gleich siehst ist die Methode.") → Röntgen → gallery. Three theme switches (dark → paper → dark → dark → paper) create rhythmic depth.
+
+**Decision:** WerkBrief's second paragraph reuses the Strukturplanung-layer's verbatim `body` text rather than inventing new prose.
+**Reason:** The Strukturplanung layer already contains the "why this project required mediation" copy — surfacing it earlier (in the Brief) and then again in the Röntgen-Scroll's Strukturplanung layer reinforces the conflict narrative without duplicating effort or risking content drift between two prose sources.
+
+**Decision:** Werke index filter respects per-card viewport position on filter swap — already-visible cards land at end-state without animation, off-screen cards retain the ScrollTrigger reveal.
+**Reason:** Audit § 4.3: v1 reset every card to `(yPercent 12, opacity 0)` on filter change. Cards inside the viewport then stayed invisible until the user scrolled, producing a jarring flash-of-empty-grid. The `getBoundingClientRect`-based gate solves it in 6 LOC without breaking the off-screen reveal cadence.
+
+**Decision:** Netzwerk Globe rotation refactored to OrbitControls-only — Earth-mesh and pin/arc group no longer rotate themselves.
+**Reason:** Audit § 4.4: globe was non-interactive (no drag), and the v1 had two rotation systems (Earth's `useFrame` + RotatingGroup's `useFrame`) that drifted apart over time. OrbitControls.autoRotate spins the camera at 0.4 around a stationary earth, collapsing rotation to one source of truth. Constraints: `enableZoom:false`, `enablePan:false`, polar [0.22π..0.78π] to keep users out of the poles. CameraFly now lerps `camera.position` onto `target.normalize() * 2.4` when a standort is selected, instead of locking a group rotation angle.
+
+**Decision:** "Rotation freigeben" button appears top-right of the Globe canvas only when `activeIndex >= 0`.
+**Reason:** Audit explicitly requires an "unlock" affordance. Without it, the only way to re-enable autoRotate after clicking a standort is to click another standort. The button calls `setActiveIndex(-1)` which both releases the camera lerp and turns autoRotate back on. Editorial trim style — small mono button with backdrop-blur, sits alongside the existing top-left section ID.
+
+**Decision:** Earth shader uniforms tightened (`uContinentDensity 0.58 → 0.64`, warmer `uColorLand`) but no NASA Blue Marble texture loaded.
+**Reason:** Audit § 4.4 recommended Option 1 (Blue Marble texture) for credibility. Asset isn't in the pipeline yet and adding a 2 MB lazy AVIF download requires Felix's curation. The uniform tweaks make continents read more prominently in the procedural shader without committing to a half-baked texture path. NASA Blue Marble at `public/textures/earth-blue-marble.avif` + a texture-loading branch in Earth.tsx is the obvious follow-up if Felix wants pre-pitch credibility upgrade.
+
+**Decision:** Stimmen Placeholder columns (Publikationen / Jury / Awards) removed for pitch v1.
+**Reason:** Audit § 4.5: "— folgt —"-blocks read as unfinished and undercut the substantial 29-Vorträge timeline above them. Better to ship a complete-looking Stimmen page with one substantial column than three columns where two are explicitly empty. The arrays in `stimmen.ts` stay so re-enabling is one-line content addition + un-deleting the JSX block.
+
+---
+
+## 2026-05-16 · W13 · Narrative repair (Hero · Methode-Intro · Werk Photo-Hero)
+
+**Decision:** Hero's prominent layer indicator migrated out of HeroHeadline into a rewritten SectionTracker at top-left of the section.
+**Reason:** Audit § 3.1 A: the v1 layer indicator was a tiny mono caption pinned bottom-right that read as a debug footnote. The new top-left SectionTracker renders display-scale uppercase ("GEBAUTE STRUKTUR") + accent-coloured `01 / 05` counter + small Fraunces italic tagline ("— Was sichtbar ist."). LayerInfo gained a `tagline` field — five short phrases pre-authored per layer. Watch the scroll-progress, change every layer transition. The old "Layer N · description" line under the H1 was removed because it duplicated the signal now carried more strongly above.
+
+**Decision:** Hero Bauchbinden (dt/dd list of Disziplinen · Standorte · Seit) added below the headline.
+**Reason:** Audit § 3.1 B: a non-Awwwards reader (Peter Bachschuster) lands on a flashy 500vh particle hero with no concrete orientation — three seconds of "what is this?". The Bauchbinden answer that hard: "Architektur · Stadtplanung · Strukturplanung", "Ingolstadt · Shanghai · Johannesburg · Linz", "Seit 1993". Small mono caption, three lines. Doesn't compete with the H1; gives the eye a place to land for the literal-minded reader.
+
+**Decision:** Skip-Intro button in Hero top-right.
+**Reason:** Audit § 3.1 C: necessary for non-Awwwards audience. Started as a Link to `/methode` (page-jump); W15 changed to smooth-scroll-to-`#manifest` (see W15 entry above) to preserve the homepage's content journey. Either way, the button releases the user from the 500vh pinned scroll without forcing them through it.
+
+**Decision:** Methode-Page now opens with a static MethodeIntro section before the pinned ForceGraph.
+**Reason:** Audit § 3.2: v1 dropped users into 400vh of pinned interactive simulation with no warning. MethodeIntro presents the three modes as a static 3-column preview (Chaos · Mediation · Struktur) with hand-drawn SVG miniatures of each (scattered red conflict lines / centre-mediator star / fully-connected green-gold pentagon). Reads as "understand first, then experience" — the user has the structure of what's coming before they encounter it as motion.
+
+**Decision:** Werk deep-dive WerkHero became a full-bleed photo hero with bottom-anchored title + meta-grid, not the v1 text-first layout.
+**Reason:** Audit § 3.3: for an architecture portfolio, opening with text-only hero ("WestPark / Verbindungssteg / 2020 / Ingolstadt / ...") is backwards — the user wants to see the building first. Photo cover with ink gradient + vignette for legibility, title bottom-left in display-section size, meta-grid bottom-right with backdrop-blur. Min-height upgraded from `[80vh]` to `screen`. Image-less projects (Shanghai, Sen) fall back to a full-bleed generative engineering-grid hull with slug-code stamp.
+
+**Decision:** Röntgen-Scroll annotation rail relocated from floating-right-overlay to full-width-below-viewer.
+**Reason:** Audit § 3.3: v1's `lg:right-s5 lg:top-1/2 lg:max-w-md lg:-translate-y-1/2` annotation card occluded the right half of the viewer — exactly where the Strukturplanung layer's pentagon-arranged stakeholder nodes live. The audit endorsed Option 1 (stacked layout) as the "edukativ"-reading alternative. New layout: viewer at top in 16:9, annotation rail full-width directly below with a 12-column internal grid (identity 5/12, body+data 7/12). The "cinematic overlay" feel is gone; clarity is gained.
+
+---
+
+## 2026-05-16 · W12 · Audit critical-bugs batch
+
+**Decision:** Hero pretitle "{brand.name} · Pitch v1" replaced with "{brand.name} · Strukturplanung · seit {brand.founded}".
+**Reason:** Audit § 1.1: "Pitch v1" was an internal dev marker that bled into the live UI. The replacement is a real brand sub-line giving the three orientation facts (who · what · since when) without breaking the editorial silence above the H1. Other "pitch v1" occurrences in JSDoc comments stay — they're rationale for decisions, never rendered.
+
+**Decision:** `Project` interface gained a `pullQuote?: { body: string; attribution: string }` field; the five featured deep-dives each carry their own quote.
+**Reason:** Audit § 1.2: v1 hardcoded a WestPark-specific "Steg-Vertrag" quote into WerkContext, which then rendered on Shanghai / Sen / Mobility Hub / VW Hope deep-dives where it made no sense. New approach: project-typed quote, falls back to nothing rather than a generic placeholder. Five quotes pre-authored per Felix verbatim from the audit prompt:
+
+- WestPark: "Vor dem Gebäude steht das System..."
+- Shanghai: "184 Tage Welt­ausstellung. Was bleibt, ist die Methode..."
+- Mobility Hub: "Mobilität nicht als Anhängsel der Stadt, sondern als Rückgrat..."
+- Sen: "Drei Lotusblätter, ein Schwerpunkt..."
+- VW Hope: "Vier Akteure, die 2006 nicht oft an einem Tisch saßen..."
+
+**Decision:** Netzwerk Reduced-Fallback (prefers-reduced-motion SVG) now projects standorte from lat/lng instead of hard-coded pixel positions.
+**Reason:** Audit § 1.3: v1 had Ingolstadt at `(410, 130)` and Linz at `(418, 132)` — visually indistinguishable despite the cities being 300 km apart. New code mirrors the equirectangular projection already used by `TeaserEarth` on the homepage. Ingolstadt (11.43° E) and Linz (14.29° E) now sit ~6 px apart, matching their actual geographic relationship.
+
+**Decision:** Homepage gained a MethodeTeaser between Manifest and WerkeTeaser — the narrative bridge the v1 build was missing.
+**Reason:** Audit § 1.4 / master prompt § 5: without a methode-teaser the user first encounters the word "Strukturplanung" on a deep-dive werk page where it lands as jargon. The teaser is a two-column editorial: left has the pretitle / display headline ("Bevor wir bauen, lösen wir den Konflikt.") / lead / CTA to /methode; right has a live ForceGraph with progress pinned at the Mediation/Struktur boundary (0.5) so the mediator + synergy edges dominate — the teaser shows what the methode _produces_, not the chaos it solves.
+
+**Decision:** Homepage gained a KontaktTeaser as the final section before the footer.
+**Reason:** Audit § 1.5: after StimmenTeaser the v1 landed directly in the Footer — no conversion bridge. The new section has a two-line display headline ("Sie haben einen Standort, / der mehr braucht als einen Architekten."), lead, magnetic-border CTA "Briefing starten" → /kontakt, plus secondary mailto:/tel: affordance and a live Ingolstadt clock to signal the site is alive.
+
+**Decision:** Three Stimmen `country` values corrected: London `Deutschland → Großbritannien`, two Ingolstadt-with-foreign-delegation entries `Portugal/Indien → Deutschland`.
+**Reason:** Audit § 1.6: `country` semantics were inconsistent. New JSDoc on the `Vortrag` type defines the rule: `country` = venue location, NOT audience origin. Foreign delegation info stays in the `venue` field. The lede on the Stimmen page also got an updated city list (added London, added Kaprun, removed Shanghai which had no entry).
+
+**Decision:** Team portraits redesigned from playful cartoon avatars ("Manschgal") to editorial silhouette tiles.
+**Reason:** Felix flagged the v1 portraits (eye dots, mouth lines, cute hair paths) as out of tone with the rest of the editorial design. New TeamPortrait: solid head silhouette (no facial features), hair as a distinct silhouette gesture per member, outfit as a geometric shoulder shape in the stakeholder palette, axonometric grid background, engineering-corner-marks, small mono caption underneath. Same prop API (Hair, Outfit, glasses, backdrop) so TeamSection didn't need changes. Felix confirmed the verified-team annotations stay; only the visual representation changed.
+
+**Decision:** Content-integrity ledger sign-off — team names + Vorträge list + project numbers all flagged "good for pitch" by Felix on 2026-05-16.
+**Reason:** Audit § 2 explicitly required Felix-verification before the team/Vorträge/numbers could be considered pitchable. Felix confirmed: the five team-member names + roles (Ines Wechsler, Brigitte Rudolph, Vera Härter, Melanie Friedrich, Margarete Wochnik) plus Peter's bio (Shanghai 2010 trip, Ewald-Kluge heritage) are correct as documented in `src/content/team.ts`. The 29 Vorträge are Felix-researched, not fabricated. The project numbers (92 m steg length, 184 days EXPO, 320 stellplätze, etc.) are verified or "plausibel genug für Pitch". No reductions needed.
+
+---
+
 ## 2026-05-14 · W1 · Foundation choices
 
 **Decision:** Use **pnpm** as package manager (lockfile `pnpm-lock.yaml`).
