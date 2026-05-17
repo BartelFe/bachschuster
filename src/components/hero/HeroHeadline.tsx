@@ -118,7 +118,20 @@ export function HeroHeadline(_props: HeroHeadlineProps) {
       </div>
 
       {/* ── Bottom block: pretitle + headline + bauchbinden ────────────── */}
-      <div className="max-w-6xl">
+      {/*
+        Overlap-fix (post-W10 review): inherit a soft ink-coloured text-shadow
+        on the entire block so the Hero's particle-field can drift behind the
+        text without compromising legibility. Same pattern as SectionTracker.
+        The halo is invisible against pure ink (the section's bg) but cuts a
+        readable rim around glyphs when particles light up behind them.
+      */}
+      <div
+        className="max-w-6xl"
+        style={{
+          textShadow:
+            '0 0 22px rgba(10, 11, 14, 0.95), 0 0 8px rgba(10, 11, 14, 0.85), 0 1px 2px rgba(10, 11, 14, 0.8)',
+        }}
+      >
         <p className="font-mono text-caption uppercase tracking-caption text-bone-muted">
           {brand.name} · Strukturplanung · seit {brand.founded}
         </p>

@@ -31,7 +31,22 @@ export function StakeholderLegend({ highlightRef }: StakeholderLegendProps) {
   }
 
   return (
-    <ul className="flex flex-wrap items-center gap-s2">
+    // Outer container with a solid-ish ink wash + backdrop-blur so the
+    // entire legend reads as a single editorial card sitting OVER the
+    // force-graph rather than competing with its nodes for the same
+    // pixels. Reviewer feedback 2026-05-16: previous individual-chip
+    // backdrop at 65 % was not enough — nodes still bled through and
+    // the chips visually merged with the moving graph in the upper-
+    // right quadrant where the "business" + "city" cluster centroids
+    // sit (see graph-data.ts CLUSTER_CENTROIDS).
+    //
+    // The vertical-stack layout (column) + max-w-[200px] caps the
+    // legend's horizontal footprint at 200 px so it occupies one corner
+    // band instead of an 800-px-wide row across the whole upper edge.
+    <ul className="flex max-w-[200px] flex-col gap-s1 border border-border-strong bg-ink/90 p-s3 backdrop-blur-md">
+      <li className="mb-s1 font-mono text-data-label uppercase tracking-data text-bone-faint">
+        Stakeholder · 05
+      </li>
       {GROUPS.map((id) => {
         const isActive = active === id;
         return (
@@ -45,24 +60,19 @@ export function StakeholderLegend({ highlightRef }: StakeholderLegendProps) {
               onBlur={() => set(null)}
               onClick={() => set(isActive ? null : id)}
               className={cn(
-                // Backdrop-blur background reclaims legibility now that the
-                // force-graph nodes can drift behind the legend chips when
-                // users drag them around. (W14 audit-overlap-fix.)
-                'group flex items-center gap-s2 border bg-ink/65 px-s2 py-s1 font-mono text-data-label uppercase tracking-data backdrop-blur-sm transition-colors duration-hover ease-cinematic',
-                isActive
-                  ? 'border-bone text-bone'
-                  : 'border-border-strong text-bone-muted hover:border-border-strong hover:text-bone',
+                'group flex w-full items-center gap-s2 py-[2px] font-mono text-data-label uppercase tracking-data transition-colors duration-hover ease-cinematic',
+                isActive ? 'text-bone' : 'text-bone-muted hover:text-bone',
               )}
             >
               <span
                 aria-hidden="true"
-                className="h-2 w-2 rounded-full"
+                className="h-2 w-2 flex-shrink-0 rounded-full"
                 style={{
                   backgroundColor: STAKEHOLDER_COLOR[id],
                   boxShadow: isActive ? `0 0 12px ${STAKEHOLDER_COLOR[id]}` : 'none',
                 }}
               />
-              {STAKEHOLDER_LABEL[id]}
+              <span className="text-left leading-tight">{STAKEHOLDER_LABEL[id]}</span>
             </button>
           </li>
         );

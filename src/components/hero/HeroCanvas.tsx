@@ -1,4 +1,4 @@
-import { Suspense, type MutableRefObject } from 'react';
+import { Suspense, useEffect, type MutableRefObject } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { PerformanceMonitor } from '@react-three/drei';
 import { ParticleField } from './ParticleField';
@@ -44,6 +44,21 @@ export function HeroCanvas({
   enablePostFx,
   onDecline,
 }: HeroCanvasProps) {
+  // R3F's internal `useMeasure` can miss the initial ResizeObserver entry
+  // when the Canvas mounts inside a parent whose layout has already settled
+  // (typical with our PageTransition wrapper + R3FErrorBoundary stack).
+  // The canvas then stays stuck at the intrinsic 300 × 150 default. One
+  // synthetic resize event after mount forces R3F to re-observe the wrap
+  // div and size the canvas to fill it. Same fix we shipped for the Globe
+  // canvas in W7 — symptom was identical (canvas 300×150 instead of full
+  // viewport, all the hero overlay text hangs in empty black space).
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 32);
+    return () => window.clearTimeout(id);
+  }, []);
+
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 50, near: 0.1, far: 100 }}
