@@ -26,9 +26,12 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
+    "@types/d3-geo": "^3.1.0",
+    "@types/topojson-client": "^3.1.5",
     "clsx": "^2.1.1",
     "d3-color": "^3.1.0",
     "d3-force": "^3.0.0",
+    "d3-geo": "^3.1.1",
     "gsap": "^3.13.0",
     "howler": "^2.2.4",
     "lenis": "^1.1.20",
@@ -38,6 +41,8 @@
     "react-router-dom": "^6.27.0",
     "tailwind-merge": "^2.5.4",
     "three": "^0.169.0",
+    "topojson-client": "^3.1.0",
+    "world-atlas": "^2.0.2",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
