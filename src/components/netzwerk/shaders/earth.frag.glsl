@@ -32,9 +32,16 @@ const float PI = 3.141592653589793;
 /* Sample the land mask at a spherical normal — re-derives lat/lon so the
    texture coordinate is independent of the SphereGeometry's UV winding. */
 float sampleLand(vec3 n) {
+  // The d3 equirectangular projection (in landMask.ts) draws lat = +π/2 at
+  // canvas-top and lon = 0 at canvas-centre, increasing eastward to the
+  // right. CanvasTexture uploads with flipY = true by default, so uv.y = 1
+  // corresponds to canvas-top → north pole. Both axes therefore need an
+  // additive mapping, not the subtractive form the v4 first cut used —
+  // otherwise the texture sampled mirrors east/west AND flips north/south,
+  // which read as "globe upside down" in the live view.
   float lon = atan(n.z, n.x);
   float lat = asin(clamp(n.y, -1.0, 1.0));
-  vec2 uv = vec2(0.5 - lon / (2.0 * PI), 0.5 - lat / PI);
+  vec2 uv = vec2(0.5 + lon / (2.0 * PI), 0.5 + lat / PI);
   return texture2D(uLandMask, uv).r;
 }
 
