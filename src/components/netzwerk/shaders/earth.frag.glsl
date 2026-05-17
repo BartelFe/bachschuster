@@ -1,21 +1,16 @@
 /**
- * Editorial wireframe-dot earth.
+ * Holographic editorial earth.
  *
- * Approach: rather than texture the sphere with a photographic basemap (which
- * we do not have on disk), we compute a layered visual on the sphere surface:
+ * v4 — switched from FBM-faked continents to a real Natural Earth land mask
+ * sampled from `uLandMask`. The look now matches the brief reference: pure
+ * black ocean, glowing white coastline outlines, uniform dot-grid that's
+ * brighter on land, and a soft blue-white limb glow. No day/night terminator
+ * any more — this is a sci-fi data globe, not a photoreal earth.
  *
- *   1. A faint latitude / longitude grid drawn from UV-derived stripes.
- *   2. A continent SDF approximated with stacked sin-noise — not geographically
- *      precise, but readable as "land vs water" at the editorial scale of the
- *      pitch (the user reads it as "earth", not as "where exactly is Brazil").
- *      Continents render as a small dot-grid pattern in warm bone; oceans
- *      render as faint blueprint cyan.
- *   3. A day/night terminator: dot the world-space normal against the sun
- *      direction supplied as a uniform. Night side darkens to near-black with
- *      a thin terrakotta city-light glow stripe along the dawn/dusk edge.
- *
- * The grid uses fwidth-based anti-aliasing so the lines don't shimmer at
- * grazing angles.
+ *   1. Sample land mask with 4 neighbour taps to derive a coastline gradient.
+ *   2. Polar-aware dot grid covers the whole sphere, brighter over land.
+ *   3. Coastline drawn with an anti-aliased edge of the gradient.
+ *   4. Fresnel rim adds the bright limb halo seen in the reference.
  */
 
 varying vec3 vNormal;
@@ -23,104 +18,74 @@ varying vec3 vWorldPos;
 varying vec2 vUv;
 
 uniform float uTime;
-uniform vec3  uSunDir;          // world-space sun direction, normalised
-uniform vec3  uColorLand;       // bone tone
-uniform vec3  uColorWater;      // blueprint cyan, muted
-uniform vec3  uColorNight;      // near-black
-uniform vec3  uColorTerm;       // terrakotta dawn glow
-uniform float uContinentDensity; // 0..1, controls dot-grid coverage
+uniform sampler2D uLandMask;
+uniform vec3  uColorLine;        // bright white-blue, for coast outlines
+uniform vec3  uColorDot;         // dot grid colour, dim cyan
+uniform vec3  uColorLand;        // subtle wash inside continents
+uniform vec3  uColorRim;         // limb halo colour
+uniform float uLineWidth;        // coastline width in radians on the sphere
+uniform float uDotIntensity;     // 0..1 dot-grid brightness over water
+uniform float uLandBoost;        // multiplier for dots over land
 
 const float PI = 3.141592653589793;
 
-/* ── 3-octave value noise — cheap, good enough for SDF approximation ── */
-float hash21(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
-}
-
-float vnoise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  float a = hash21(i);
-  float b = hash21(i + vec2(1.0, 0.0));
-  float c = hash21(i + vec2(0.0, 1.0));
-  float d = hash21(i + vec2(1.0, 1.0));
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-}
-
-float fbm(vec2 p) {
-  float v = 0.0;
-  float a = 0.5;
-  for (int i = 0; i < 4; i++) {
-    v += a * vnoise(p);
-    p *= 2.0;
-    a *= 0.5;
-  }
-  return v;
+/* Sample the land mask at a spherical normal — re-derives lat/lon so the
+   texture coordinate is independent of the SphereGeometry's UV winding. */
+float sampleLand(vec3 n) {
+  float lon = atan(n.z, n.x);
+  float lat = asin(clamp(n.y, -1.0, 1.0));
+  vec2 uv = vec2(0.5 - lon / (2.0 * PI), 0.5 - lat / PI);
+  return texture2D(uLandMask, uv).r;
 }
 
 void main() {
-  // ── Spherical coordinates from world position ─────────────────────────
   vec3 nrm = normalize(vWorldPos);
-  float lat = asin(nrm.y);           // -PI/2 .. PI/2
-  float lon = atan(nrm.z, nrm.x);    // -PI .. PI
+  float lat = asin(clamp(nrm.y, -1.0, 1.0));
+  float lon = atan(nrm.z, nrm.x);
 
-  // ── Continent SDF approximation ───────────────────────────────────────
-  // Two FBM samples in lat/lon, biased to favour the visible continent
-  // shapes statistically (more land in the north, less near the poles).
-  vec2 p = vec2(lon * 2.0, lat * 3.0);
-  float n = fbm(p + 1.7) * 0.6 + fbm(p * 2.0 - 3.1) * 0.4;
-  float poleFade = 1.0 - smoothstep(1.0, 1.4, abs(lat));
-  float landSdf = (n * poleFade) - (1.0 - uContinentDensity);
+  /* ── Land mask + coastline gradient ───────────────────────────────── */
+  float land = sampleLand(nrm);
 
-  // ── Lat/Lon grid lines ────────────────────────────────────────────────
-  // 18 longitudes (every 20°), 9 latitudes (every 20°).
-  float lonGrid = abs(fract(lon * 9.0 / PI) - 0.5);  // 0 on line, 0.5 between
-  float latGrid = abs(fract(lat * 9.0 / PI) - 0.5);
-  float lineWidth = 0.04;
-  float lonLine = 1.0 - smoothstep(0.0, lineWidth, lonGrid);
-  float latLine = 1.0 - smoothstep(0.0, lineWidth, latGrid);
-  float grid = max(lonLine, latLine) * 0.22;
+  // 4-tap neighbour sample in tangent space to derive the coastline.
+  vec3 tEast  = normalize(vec3(-nrm.z, 0.0, nrm.x));
+  vec3 tNorth = cross(nrm, tEast);
+  float eps = uLineWidth;
+  float lE = sampleLand(normalize(nrm + tEast * eps));
+  float lW = sampleLand(normalize(nrm - tEast * eps));
+  float lN = sampleLand(normalize(nrm + tNorth * eps));
+  float lS = sampleLand(normalize(nrm - tNorth * eps));
+  float edge = max(max(abs(lE - lW), abs(lN - lS)),
+                   max(abs(lE - land), abs(lN - land)));
+  float coast = smoothstep(0.05, 0.35, edge);
 
-  // ── Continent dot-matrix ──────────────────────────────────────────────
-  // A polar-aware dot pattern: spacing in lat is uniform; lon spacing is
-  // scaled by cos(lat) so the dots don't bunch at the poles.
-  float dotSpacingLat = 0.06;
-  float dotSpacingLon = dotSpacingLat / max(cos(lat), 0.15);
+  /* ── Dot grid over the whole sphere ───────────────────────────────── */
+  float dotSpacingLat = 0.045;
+  float dotSpacingLon = dotSpacingLat / max(cos(lat), 0.18);
   vec2 dotCell = vec2(
     mod(lon, dotSpacingLon) / dotSpacingLon - 0.5,
     mod(lat, dotSpacingLat) / dotSpacingLat - 0.5
   );
   float dotDist = length(dotCell);
-  float dotMask = 1.0 - smoothstep(0.18, 0.32, dotDist);
-  dotMask *= step(0.0, landSdf);
+  float dotMask = 1.0 - smoothstep(0.16, 0.30, dotDist);
+  float dotStrength = mix(uDotIntensity, uDotIntensity * uLandBoost, land);
+  vec3 dotCol = uColorDot * dotMask * dotStrength;
 
-  // ── Base color (continents vs oceans) ─────────────────────────────────
-  vec3 baseColor = mix(uColorWater, uColorLand, smoothstep(0.0, 0.05, landSdf));
-  baseColor = mix(baseColor, uColorLand * 1.15, dotMask * 0.85);
-  baseColor += grid * vec3(0.5, 0.6, 0.7);
+  /* ── Coastline outline ────────────────────────────────────────────── */
+  vec3 coastCol = uColorLine * coast;
 
-  // ── Day/Night lighting + terminator ───────────────────────────────────
-  float ndotl = dot(nrm, normalize(uSunDir));     // -1 .. 1
-  float dayFactor = smoothstep(-0.05, 0.20, ndotl); // hard-ish day mask
-  float termGlow = smoothstep(0.05, 0.0, abs(ndotl)) * 0.7; // thin band on dawn line
+  /* ── Subtle fill on land so it reads as a continent, not just dots ── */
+  vec3 landFill = uColorLand * land * 0.18;
 
-  vec3 dayColor = baseColor;
-  vec3 nightColor = mix(uColorNight, baseColor * 0.12, dotMask * 0.6); // city-lights hint where land
-  vec3 finalColor = mix(nightColor, dayColor, dayFactor);
-  finalColor += uColorTerm * termGlow * (0.6 + 0.4 * dotMask);
+  /* ── Compose base ─────────────────────────────────────────────────── */
+  vec3 col = landFill + dotCol + coastCol;
 
-  // ── Rim falloff so the sphere reads as a sphere, not a flat disk ──────
-  // v2 (brand-CI): rim tinted to brand cyan #75C9D9 (≈ 0.46/0.79/0.85 in
-  // linear RGB). Intensity dropped from 0.6 → 0.32 so the limb glow reads
-  // as a quiet brand accent, not a saturated atmospheric ring.
-  float rim = pow(1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0), 2.0);
-  finalColor += rim * vec3(0.46, 0.79, 0.85) * 0.32;
+  /* ── Fresnel limb glow ────────────────────────────────────────────── */
+  float ndv = max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0);
+  float rim = pow(1.0 - ndv, 2.4);
+  col += uColorRim * rim * 0.9;
 
-  // Slight pulse on continents tied to uTime — a quiet life sign
-  finalColor += dotMask * 0.04 * sin(uTime * 0.6 + lat * 4.0 + lon * 6.0);
+  /* ── Quiet life-sign: tiny pulse across the land dots ─────────────── */
+  col += dotMask * land * 0.05 * sin(uTime * 0.5 + lat * 4.0 + lon * 6.0);
 
-  gl_FragColor = vec4(finalColor, 1.0);
+  gl_FragColor = vec4(col, 1.0);
 }
