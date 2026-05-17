@@ -84,7 +84,7 @@ export function DebugLayerSlider({ morphRef }: DebugLayerSliderProps) {
         value={display}
         onChange={(e) => setValue(Number(e.target.value))}
         className="mt-s2 w-full"
-        style={{ accentColor: '#B85C2E' }}
+        style={{ accentColor: '#75C9D9' }}
         aria-label="Layer-Morph zwischen 0 (Gebaute Struktur) und 4 (Konflikte)"
         data-cursor="link"
       />

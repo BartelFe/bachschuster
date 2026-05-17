@@ -45,7 +45,10 @@ export function StakeholderLegend({ highlightRef }: StakeholderLegendProps) {
               onBlur={() => set(null)}
               onClick={() => set(isActive ? null : id)}
               className={cn(
-                'group flex items-center gap-s2 border px-s2 py-s1 font-mono text-data-label uppercase tracking-data transition-colors duration-hover ease-cinematic',
+                // Backdrop-blur background reclaims legibility now that the
+                // force-graph nodes can drift behind the legend chips when
+                // users drag them around. (W14 audit-overlap-fix.)
+                'group flex items-center gap-s2 border bg-ink/65 px-s2 py-s1 font-mono text-data-label uppercase tracking-data backdrop-blur-sm transition-colors duration-hover ease-cinematic',
                 isActive
                   ? 'border-bone text-bone'
                   : 'border-border-strong text-bone-muted hover:border-border-strong hover:text-bone',

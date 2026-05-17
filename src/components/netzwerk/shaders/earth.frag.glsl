@@ -113,8 +113,11 @@ void main() {
   finalColor += uColorTerm * termGlow * (0.6 + 0.4 * dotMask);
 
   // ── Rim falloff so the sphere reads as a sphere, not a flat disk ──────
+  // v2 (brand-CI): rim tinted to brand cyan #75C9D9 (≈ 0.46/0.79/0.85 in
+  // linear RGB). Intensity dropped from 0.6 → 0.32 so the limb glow reads
+  // as a quiet brand accent, not a saturated atmospheric ring.
   float rim = pow(1.0 - max(dot(vNormal, vec3(0.0, 0.0, 1.0)), 0.0), 2.0);
-  finalColor += rim * vec3(0.16, 0.34, 0.48) * 0.6;
+  finalColor += rim * vec3(0.46, 0.79, 0.85) * 0.32;
 
   // Slight pulse on continents tied to uTime — a quiet life sign
   finalColor += dotMask * 0.04 * sin(uTime * 0.6 + lat * 4.0 + lon * 6.0);

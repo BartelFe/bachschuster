@@ -33,8 +33,12 @@ interface NetzwerkGlobeProps {
 }
 
 const EARTH_RADIUS = 1;
-const CAMERA_DEFAULT_DISTANCE = 3.2;
-const CAMERA_LOCKED_DISTANCE = 2.4;
+// v2 (brand-CI clean-up): camera pulled back from 3.2 → 4.2 so the globe
+// reads as a "schlichtes Editorial-Objekt" inside the section instead of
+// dominating the viewport like a rocky planet. Locked distance bumped in
+// proportion (2.4 → 3.0) so the standort-fly-in stays a comfortable zoom.
+const CAMERA_DEFAULT_DISTANCE = 4.2;
+const CAMERA_LOCKED_DISTANCE = 3.0;
 
 /**
  * The composed R3F scene.
@@ -131,7 +135,7 @@ export function NetzwerkGlobe({ activeIndex, setActiveIndex, tier }: NetzwerkGlo
           })}
         </group>
 
-        {tier !== 'mobile' && <Atmosphere earthRadius={EARTH_RADIUS} shellScale={1.085} />}
+        {tier !== 'mobile' && <Atmosphere earthRadius={EARTH_RADIUS} />}
 
         <OrbitControls
           ref={controlsRef}

@@ -35,9 +35,16 @@ export function SectionTracker({ morphRef, hidden = false }: SectionTrackerProps
     <div
       aria-hidden="true"
       className={cn(
+        // Brand-CI overlap-fix: inheritable text-shadow gives every label
+        // line a soft ink-coloured halo so it reads cleanly over the giant
+        // H1 ascenders below without needing an opaque card behind it.
         'pointer-events-none absolute left-s4 top-s6 z-30 max-w-[18rem] transition-opacity duration-reveal ease-cinematic sm:left-s5 sm:top-s7 sm:max-w-[24rem] lg:top-s8',
         hidden ? 'opacity-0' : 'opacity-100',
       )}
+      style={{
+        textShadow:
+          '0 0 18px rgba(10, 11, 14, 0.95), 0 0 6px rgba(10, 11, 14, 0.85), 0 1px 2px rgba(10, 11, 14, 0.8)',
+      }}
     >
       {/* Numeric position — mono, accented number, faint total */}
       <p className="font-mono text-base uppercase tracking-data sm:text-xl md:text-2xl">

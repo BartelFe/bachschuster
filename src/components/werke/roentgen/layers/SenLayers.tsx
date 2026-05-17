@@ -348,9 +348,9 @@ export function SenProgramm(props: SVGProps<SVGSVGElement>) {
           cy="-25"
           rx="100"
           ry="40"
-          fill="#B85C2E"
+          fill="#75C9D9"
           fillOpacity="0.22"
-          stroke="#B85C2E"
+          stroke="#75C9D9"
           strokeWidth="1"
           data-draw="true"
         />
@@ -614,9 +614,9 @@ export function SenStrukturplanung(props: SVGProps<SVGSVGElement>) {
             </text>
           </g>
         ))}
-        {/* Mediator */}
-        <circle cx={cx} cy={cy} r="46" fill="#B85C2E" fillOpacity="0.12" />
-        <circle cx={cx} cy={cy} r="22" fill="#B85C2E" />
+        {/* Mediator — brand cyan v2 */}
+        <circle cx={cx} cy={cy} r="46" fill="#75C9D9" fillOpacity="0.12" />
+        <circle cx={cx} cy={cy} r="22" fill="#75C9D9" />
         <circle cx={cx} cy={cy} r="7" fill="#0A0B0E" />
         <text
           x={cx}
@@ -624,7 +624,7 @@ export function SenStrukturplanung(props: SVGProps<SVGSVGElement>) {
           textAnchor="middle"
           fontSize="13"
           letterSpacing="3"
-          fill="#D97648"
+          fill="#A4DEEB"
           className="font-mono"
         >
           STRUKTURPLANUNG

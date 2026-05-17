@@ -44,11 +44,18 @@ const config: Config = {
         'ink-soft': '#1A1612',
         'ink-faded': '#4A453D',
 
-        // ─── Accent: Terrakotta / Clay ────────────────────────
+        // ─── Accent: Aqua-Cyan / Architectural Blueprint ──────
+        // v2 (2026-05-17 brand-CI refresh) — switched from terrakotta to
+        // the existing bachschuster.de brand cyan. Felix specified
+        // #75C9D9 primary + #4E8FCC nuance; #A4DEEB derived as the
+        // lighter "glow" used by lit pin halos + particle layer-mid.
+        // Stakeholder palette is intentionally untouched: `stk-business`
+        // stays terrakotta so the force-graph stakeholder groups remain
+        // visually distinguishable.
         accent: {
-          DEFAULT: '#B85C2E',
-          glow: '#D97648',
-          shadow: '#7A3A1C',
+          DEFAULT: '#75C9D9',
+          glow: '#A4DEEB',
+          shadow: '#4E8FCC',
         },
 
         // ─── Data Layer: Architectural Blueprint ──────────────
@@ -89,10 +96,14 @@ const config: Config = {
       },
 
       fontSize: {
-        // Display (serif) — clamp ranges from § 3.2
+        // Display (serif) — clamp ranges from § 3.2.
+        // hero upper bound dropped from 280 → 220 (audit overlap-fix):
+        // on wide displays the v1 280px ascenders punched up into the
+        // SectionTracker label region at top-left. 220px keeps the headline
+        // monumental while clearing the top trim.
         'display-hero': [
-          'clamp(120px, 14vw, 280px)',
-          { lineHeight: '0.9', letterSpacing: '-0.04em', fontWeight: '300' },
+          'clamp(112px, 12vw, 220px)',
+          { lineHeight: '0.92', letterSpacing: '-0.04em', fontWeight: '300' },
         ],
         'display-section': [
           'clamp(80px, 8vw, 160px)',

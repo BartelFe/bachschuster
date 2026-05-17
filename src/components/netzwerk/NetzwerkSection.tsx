@@ -184,8 +184,8 @@ function ReducedFallback() {
           const { x, y } = project(s.lat, s.lng);
           return (
             <g key={s.city}>
-              <circle cx={x} cy={y} r="6" fill="#D97648" />
-              <circle cx={x} cy={y} r="14" fill="none" stroke="#D97648" strokeWidth="1" />
+              <circle cx={x} cy={y} r="6" fill="#A4DEEB" />
+              <circle cx={x} cy={y} r="14" fill="none" stroke="#75C9D9" strokeWidth="1" />
               <text
                 x={x + 18}
                 y={y + 4}

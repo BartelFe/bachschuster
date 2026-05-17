@@ -27,7 +27,10 @@ interface TeamPortraitProps extends SVGProps<SVGSVGElement> {
 }
 
 const OUTFIT_HEX: Record<Outfit, string> = {
-  accent: '#B85C2E',
+  // v2 brand-CI: `accent` outfit follows the new cyan brand. The portraits
+  // are stylised — not photographic — so the outfit colour reads as a
+  // "brand chip" on the member rather than a literal wardrobe match.
+  accent: '#75C9D9',
   cyan: '#4D8FBF',
   environment: '#5A7A48',
   citizens: '#C9A93B',

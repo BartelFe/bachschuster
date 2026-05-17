@@ -681,8 +681,9 @@ export function HubStrukturplanung(props: SVGProps<SVGSVGElement>) {
             </text>
           </g>
         ))}
-        <circle cx={cx} cy={cy} r="46" fill="#B85C2E" fillOpacity="0.12" />
-        <circle cx={cx} cy={cy} r="22" fill="#B85C2E" />
+        {/* Mediator — brand cyan v2 */}
+        <circle cx={cx} cy={cy} r="46" fill="#75C9D9" fillOpacity="0.12" />
+        <circle cx={cx} cy={cy} r="22" fill="#75C9D9" />
         <circle cx={cx} cy={cy} r="7" fill="#0A0B0E" />
         <text
           x={cx}
@@ -690,7 +691,7 @@ export function HubStrukturplanung(props: SVGProps<SVGSVGElement>) {
           textAnchor="middle"
           fontSize="13"
           letterSpacing="3"
-          fill="#D97648"
+          fill="#A4DEEB"
           className="font-mono"
         >
           STRUKTURPLANUNG

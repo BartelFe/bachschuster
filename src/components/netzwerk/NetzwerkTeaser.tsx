@@ -100,12 +100,45 @@ export function NetzwerkTeaser() {
 }
 
 /**
- * Equirectangular-projection SVG earth: dot-grid backdrop, faint continent
- * blobs, four standort pins with city + live time labels.
+ * Equirectangular-projection SVG earth — v2 (brand-CI overlap-fix).
  *
- * Pin pixel positions are derived from each standort's lat/lng mapped onto
- * an 800×400 viewBox (x = (lng+180)/360 × 800, y = (90−lat)/180 × 400).
+ * v1 used five decorative ellipses as "continents" that didn't read as Earth.
+ * v2 hand-authored simplified continent silhouettes (North + South America,
+ * Greenland, Eurasia split into Europe / Africa / Asia, Australia, an
+ * Antarctic strip). Geometry is intentionally lo-fi — the goal is "I
+ * recognise the planet at 200 ms glance", not cartographic accuracy.
+ *
+ * Pin positions still derive from lat/lng. Labels collision-aware: when two
+ * pins are within `LABEL_COLLIDE_RADIUS` (default 22 px) they fan vertically
+ * — one anchors above its pin, the other below — so Ingolstadt (48.77° N,
+ * 11.43° E) and Linz (48.31° N, 14.29° E) don't bake into a single
+ * illegible smudge as they did in v1.
  */
+const CONTINENT_PATHS: ReadonlyArray<string> = [
+  // North America (incl. Mexico/Central America)
+  'M 90 95 L 120 78 L 170 72 L 220 78 L 250 94 L 270 122 L 268 152 L 244 184 L 228 218 L 210 246 L 188 256 L 170 246 L 154 222 L 132 200 L 108 170 L 92 138 Z',
+  // Greenland
+  'M 296 70 L 332 64 L 354 78 L 356 102 L 340 116 L 314 116 L 298 100 Z',
+  // South America
+  'M 232 232 L 270 232 L 296 250 L 308 282 L 304 318 L 290 350 L 268 364 L 248 358 L 230 332 L 222 296 L 222 260 Z',
+  // Europe (cluster of small lobes)
+  'M 382 108 L 408 100 L 430 102 L 446 116 L 450 132 L 442 146 L 422 156 L 398 154 L 384 142 L 376 124 Z',
+  // Africa
+  'M 408 168 L 444 162 L 472 174 L 488 198 L 488 232 L 476 270 L 458 296 L 434 308 L 414 296 L 402 268 L 398 232 L 400 196 Z',
+  // Asia (largest landmass — extends to Kamchatka)
+  'M 452 92 L 510 76 L 580 76 L 642 90 L 688 110 L 712 134 L 706 162 L 678 188 L 638 210 L 596 218 L 558 210 L 524 196 L 492 178 L 466 156 L 452 130 Z',
+  // India peninsula (south of Asia)
+  'M 540 180 L 568 184 L 580 208 L 570 232 L 552 226 L 542 208 Z',
+  // South-East-Asia archipelago (Indonesia simplified)
+  'M 620 220 L 668 218 L 690 228 L 680 240 L 642 238 L 622 232 Z',
+  // Australia
+  'M 656 252 L 706 252 L 728 266 L 728 286 L 710 300 L 678 304 L 658 296 L 648 278 Z',
+  // Antarctica — thin strip at the bottom
+  'M 30 372 L 770 372 L 770 392 L 30 392 Z',
+];
+
+const LABEL_COLLIDE_RADIUS = 26; // px in viewBox space
+
 function TeaserEarth() {
   const W = 800;
   const H = 400;
@@ -113,75 +146,105 @@ function TeaserEarth() {
     x: ((lng + 180) / 360) * W,
     y: ((90 - lat) / 180) * H,
   });
+
+  // Resolve label-anchor offsets per pin: for each standort, check whether
+  // a previously-positioned pin is within the collision radius. If so, flip
+  // this one's label below; otherwise default above-right.
+  const pins = standorte.map((s, i) => {
+    const { x, y } = project(s.lat, s.lng);
+    let labelDy = 5; // default below the pin centre
+    let labelDx = 18;
+    for (let j = 0; j < i; j++) {
+      const prev = standorte[j]!;
+      const p = project(prev.lat, prev.lng);
+      const dx = p.x - x;
+      const dy = p.y - y;
+      if (Math.sqrt(dx * dx + dy * dy) < LABEL_COLLIDE_RADIUS) {
+        // Push this label downward (and slightly right) so it clears the prior.
+        labelDy = 32;
+        labelDx = 18;
+        break;
+      }
+    }
+    return { ...s, x, y, labelDx, labelDy };
+  });
+
+  const hauptsitz = pins[0]!;
+
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="h-auto w-full text-data-cyan"
+      className="h-auto w-full"
       role="img"
-      aria-label="Globusvorschau"
+      aria-label="Globusvorschau mit vier Standorten"
     >
       <defs>
         <pattern id="teaser-dots" width="14" height="14" patternUnits="userSpaceOnUse">
-          <circle cx="7" cy="7" r="1.1" fill="currentColor" />
+          <circle cx="7" cy="7" r="1" fill="#4D8FBF" fillOpacity="0.32" />
         </pattern>
         <radialGradient id="teaser-vignette" cx="50%" cy="50%" r="65%">
           <stop offset="60%" stopColor="rgba(10,11,14,0)" />
-          <stop offset="100%" stopColor="rgba(10,11,14,0.9)" />
+          <stop offset="100%" stopColor="rgba(10,11,14,0.92)" />
         </radialGradient>
       </defs>
-      <rect width={W} height={H} fill="url(#teaser-dots)" opacity="0.5" />
-      {/* Faint continent ellipses as decorative shapes */}
-      <g fill="#0E1822" opacity="0.85">
-        <ellipse cx="200" cy="160" rx="120" ry="60" />
-        <ellipse cx="430" cy="180" rx="110" ry="50" />
-        <ellipse cx="550" cy="240" rx="60" ry="70" />
-        <ellipse cx="630" cy="170" rx="100" ry="50" />
-        <ellipse cx="280" cy="280" rx="55" ry="40" />
+
+      {/* Ocean: dot-grid as planet backdrop */}
+      <rect width={W} height={H} fill="url(#teaser-dots)" opacity="0.55" />
+
+      {/* Continents — filled silhouettes, very dezent, with a thin stroke
+          so the outlines read even where the fill is faint. */}
+      <g fill="#F2EDE2" fillOpacity="0.07" stroke="#F2EDE2" strokeOpacity="0.18" strokeWidth="0.6">
+        {CONTINENT_PATHS.map((d, i) => (
+          <path key={i} d={d} />
+        ))}
       </g>
+
+      {/* Edge vignette */}
       <rect width={W} height={H} fill="url(#teaser-vignette)" />
-      {standorte.map((s, i) => {
-        const { x, y } = project(s.lat, s.lng);
-        return (
-          <g key={s.city} data-pin transform={`translate(${x} ${y})`}>
-            <circle r="14" fill="none" stroke="#B85C2E" strokeWidth="1" opacity="0.5" />
-            <circle r="5" fill="#D97648" />
-            <g transform="translate(18 5)">
-              <text
-                fontSize="11"
-                fontFamily="ui-monospace, monospace"
-                letterSpacing="1.6"
-                fill="#F2EDE2"
-                style={{ textTransform: 'uppercase' }}
-              >
-                {s.city}
-              </text>
-              <text
-                y="14"
-                fontSize="9"
-                fontFamily="ui-monospace, monospace"
-                letterSpacing="1.4"
-                fill="#9B9385"
-                style={{ textTransform: 'uppercase' }}
-              >
-                {formatLocalTime(s.tz)} · seit {s.since}
-              </text>
-            </g>
-            {/* Connection line from Ingolstadt (Hauptsitz, i=0) to the others */}
-            {i > 0 ? (
-              <line
-                x1={0}
-                y1={0}
-                x2={project(standorte[0]!.lat, standorte[0]!.lng).x - x}
-                y2={project(standorte[0]!.lat, standorte[0]!.lng).y - y}
-                stroke="#D97648"
-                strokeWidth="0.6"
-                strokeDasharray="3 4"
-                opacity="0.5"
-              />
-            ) : null}
+
+      {/* Connection arcs — drawn first so pins layer above */}
+      {pins.slice(1).map((p) => (
+        <line
+          key={`arc-${p.city}`}
+          x1={hauptsitz.x}
+          y1={hauptsitz.y}
+          x2={p.x}
+          y2={p.y}
+          stroke="#75C9D9"
+          strokeWidth="0.6"
+          strokeDasharray="3 4"
+          opacity="0.4"
+        />
+      ))}
+
+      {/* Pins + labels */}
+      {pins.map((p) => (
+        <g key={p.city} data-pin transform={`translate(${p.x} ${p.y})`}>
+          <circle r="14" fill="none" stroke="#75C9D9" strokeWidth="1" opacity="0.5" />
+          <circle r="5" fill="#A4DEEB" />
+          <g transform={`translate(${p.labelDx} ${p.labelDy})`}>
+            <text
+              fontSize="11"
+              fontFamily="ui-monospace, monospace"
+              letterSpacing="1.6"
+              fill="#F2EDE2"
+              style={{ textTransform: 'uppercase' }}
+            >
+              {p.city}
+            </text>
+            <text
+              y="14"
+              fontSize="9"
+              fontFamily="ui-monospace, monospace"
+              letterSpacing="1.4"
+              fill="#9B9385"
+              style={{ textTransform: 'uppercase' }}
+            >
+              {formatLocalTime(p.tz)} · seit {p.since}
+            </text>
           </g>
-        );
-      })}
+        </g>
+      ))}
     </svg>
   );
 }

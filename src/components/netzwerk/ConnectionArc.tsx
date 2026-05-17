@@ -51,7 +51,7 @@ export function ConnectionArc({
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColor: { value: new Color('#D97648') },
+      uColor: { value: new Color('#A4DEEB') },
       uSpeed: { value: speed },
       uDashCount: { value: 5 },
     }),

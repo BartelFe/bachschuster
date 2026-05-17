@@ -30,16 +30,17 @@ export function Earth({ radius = 1, segments = 96, sunDirRef }: EarthProps) {
     () => ({
       uTime: { value: 0 },
       uSunDir: { value: new Vector3(1, 0.2, 0.5).normalize() },
-      // Land tone slightly warmer + brighter, so the dot-pattern continents
-      // pop more strongly against the cyan oceans now that OrbitControls
-      // gives users free rotation to inspect the surface (W14 audit).
-      uColorLand: { value: new Color('#EFE6D2') },
-      uColorWater: { value: new Color('#162533') },
-      uColorNight: { value: new Color('#060709') },
-      uColorTerm: { value: new Color('#D97648') },
-      // Continent coverage raised so the abstracted geography reads as
-      // "earth" instead of "abstract sphere" when the user spins it.
-      uContinentDensity: { value: 0.64 },
+      // v3 (brand-CI clean-up): editorial monochrome — quiet bone land on
+      // a near-black ocean, no warm contrast, no saturated atmosphere.
+      // Pairs with the brand-cyan terminator + cyan rim so the only colour
+      // on the globe is the brand-accent itself. Continent density nudged
+      // up so the abstracted geography still reads as "earth" at the new
+      // pulled-back camera distance.
+      uColorLand: { value: new Color('#E0DAC9') },
+      uColorWater: { value: new Color('#0E1620') },
+      uColorNight: { value: new Color('#04050A') },
+      uColorTerm: { value: new Color('#A4DEEB') },
+      uContinentDensity: { value: 0.66 },
     }),
     [],
   );

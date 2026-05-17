@@ -523,9 +523,10 @@ export function LayerStrukturplanung(props: SVGProps<SVGSVGElement>) {
             </text>
           </g>
         ))}
-        {/* Mediator: the Strukturplanung itself */}
-        <circle cx={cx} cy={cy} r="44" fill="#B85C2E" fillOpacity="0.12" />
-        <circle cx={cx} cy={cy} r="20" fill="#B85C2E" />
+        {/* Mediator: the Strukturplanung itself — brand cyan to read as
+            "Bachschuster's mediating layer" distinct from the 5 stakeholders. */}
+        <circle cx={cx} cy={cy} r="44" fill="#75C9D9" fillOpacity="0.12" />
+        <circle cx={cx} cy={cy} r="20" fill="#75C9D9" />
         <circle cx={cx} cy={cy} r="6" fill="#0A0B0E" />
         <text
           x={cx}
@@ -533,7 +534,7 @@ export function LayerStrukturplanung(props: SVGProps<SVGSVGElement>) {
           textAnchor="middle"
           fontSize="13"
           letterSpacing="3"
-          fill="#D97648"
+          fill="#A4DEEB"
           className="font-mono"
         >
           STRUKTURPLANUNG

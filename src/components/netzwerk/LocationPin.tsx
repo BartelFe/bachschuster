@@ -110,8 +110,8 @@ export function LocationPin({
       <mesh ref={dotRef}>
         <sphereGeometry args={[0.012, 16, 12]} />
         <meshStandardMaterial
-          color={new Color('#D97648')}
-          emissive={new Color('#D97648')}
+          color={new Color('#A4DEEB')}
+          emissive={new Color('#A4DEEB')}
           emissiveIntensity={1.2}
           toneMapped={false}
         />
@@ -119,14 +119,14 @@ export function LocationPin({
       {/* Outer ring — flat torus facing outward */}
       <mesh ref={ringRef} position={[0, 0, 0.005]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.036, 0.003, 12, 48]} />
-        <meshBasicMaterial color={new Color('#B85C2E')} transparent toneMapped={false} />
+        <meshBasicMaterial color={new Color('#75C9D9')} transparent toneMapped={false} />
       </mesh>
       {/* Vertical stem — a thin line extending outward, anchors the pin
           visually so it doesn't feel pasted on. */}
       <mesh position={[0, 0, 0.06]}>
         <cylinderGeometry args={[0.0015, 0.0015, 0.12, 6]} />
         <meshBasicMaterial
-          color={new Color('#D97648')}
+          color={new Color('#A4DEEB')}
           transparent
           opacity={0.65}
           toneMapped={false}

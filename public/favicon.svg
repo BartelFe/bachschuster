@@ -4,6 +4,6 @@
   <!-- Bachschuster mark: a small dot inside a square, evoking the Strukturplanung
        central-mediator visual that appears across every deep-dive's last layer. -->
   <rect x="4" y="4" width="24" height="24" fill="none" stroke="#F2EDE2" stroke-width="1.4"/>
-  <circle cx="16" cy="16" r="5.5" fill="#B85C2E"/>
+  <circle cx="16" cy="16" r="5.5" fill="#75C9D9"/>
   <circle cx="16" cy="16" r="1.8" fill="#0A0B0E"/>
 </svg>

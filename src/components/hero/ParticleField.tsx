@@ -47,9 +47,13 @@ export function ParticleField({ count, morphRef, exitRef }: ParticleFieldProps) 
         uMorph: { value: 0 },
         uReveal: { value: 0 },
         uExit: { value: 0 },
-        uLayerColor0: { value: new THREE.Color('#4D8FBF') }, // data-cyan
-        uLayerColor1: { value: new THREE.Color('#D97648') }, // accent-glow
-        uLayerColor2: { value: new THREE.Color('#B85C2E') }, // accent-primary
+        // v2 brand-CI: layer colour ramp is now monochromatic cool — data
+        // cyan → accent cyan → accent shadow → bone-muted. The terrakotta
+        // hops in v1 broke the cool palette; the new gradient lets the 5
+        // morph layers read as a single tonal family.
+        uLayerColor0: { value: new THREE.Color('#4D8FBF') }, // data-cyan (medium steel)
+        uLayerColor1: { value: new THREE.Color('#A4DEEB') }, // accent-glow (light cyan)
+        uLayerColor2: { value: new THREE.Color('#75C9D9') }, // accent (primary cyan)
         uLayerColor3: { value: new THREE.Color('#9B9385') }, // bone-muted
       },
     };

@@ -71,7 +71,10 @@ export function MethodeSection() {
       {/* Foreground: pretitle + legend top, narrative right, CTA bottom. */}
       <div className="pointer-events-none relative z-10 grid h-full grid-rows-[auto_1fr_auto] gap-s5 px-s4 py-s7 sm:px-s5 sm:py-s8">
         <header className="pointer-events-auto flex flex-col gap-s3 sm:flex-row sm:items-end sm:justify-between sm:gap-s5">
-          <div>
+          {/* Title block sits on top of the canvas — same backdrop-blur
+              treatment as the right-side narrative so dragged stakeholder
+              nodes can't make the headline illegible. (W14 audit overlap-fix.) */}
+          <div className="border-l-2 border-accent bg-ink/55 px-s3 py-s2 backdrop-blur-md">
             <p className="font-mono text-caption uppercase tracking-caption text-bone-faint">
               Die Methode
             </p>
@@ -90,7 +93,7 @@ export function MethodeSection() {
           </div>
         </div>
 
-        <footer className="pointer-events-auto flex flex-wrap items-center justify-between gap-s3 border-t border-border-subtle pt-s4">
+        <footer className="pointer-events-auto flex flex-wrap items-center justify-between gap-s3 border-t border-border-subtle bg-ink/55 px-s3 py-s4 backdrop-blur-md">
           <p className="font-mono text-caption uppercase tracking-caption text-bone-muted">
             Strukturplanung steht <span className="text-accent">vor</span> Stadtplanung und
             Architektur.

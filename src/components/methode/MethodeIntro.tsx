@@ -249,7 +249,7 @@ function MediationDiagram() {
       ))}
       {/* Mediator — accent-glow halo + bone fill */}
       <circle cx="50" cy="50" r="7" fill="#F2EDE2" />
-      <circle cx="50" cy="50" r="11" fill="none" stroke="#B85C2E" strokeWidth="0.5" opacity="0.7" />
+      <circle cx="50" cy="50" r="11" fill="none" stroke="#75C9D9" strokeWidth="0.5" opacity="0.7" />
     </svg>
   );
 }

@@ -46,14 +46,21 @@ function makeClusterForce(
   progressRef: MutableRefObject<number>,
 ) {
   let nodes: GraphNode[] = [];
+  // W-CI overlap-fix: tightened from 0.32 / 0.34 to 0.24 / 0.26 so the
+  // pentagon of stakeholder clusters lives in the centre 50 % of the
+  // canvas — leaves margin for the top legend chips, the bottom-right
+  // narrative card, and the left-anchored section title without dragged
+  // nodes drifting under them.
+  const RADIUS_X = 0.24;
+  const RADIUS_Y = 0.26;
   function force(alpha: number) {
     const k = modeAtProgress(progressRef.current).forces.clusterStrength;
     const w = width();
     const h = height();
     for (const node of nodes) {
       const c = CLUSTER_CENTROIDS[node.stakeholder];
-      const targetX = w * 0.5 + c[0] * w * 0.32;
-      const targetY = h * 0.5 + c[1] * h * 0.34;
+      const targetX = w * 0.5 + c[0] * w * RADIUS_X;
+      const targetY = h * 0.5 + c[1] * h * RADIUS_Y;
       node.vx! += (targetX - (node.x ?? 0)) * k * alpha;
       node.vy! += (targetY - (node.y ?? 0)) * k * alpha;
     }
@@ -137,10 +144,12 @@ export function ForceGraph({ progressRef, highlightRef }: ForceGraphProps) {
     resize();
 
     // ── Initial positioning around stakeholder centroids ────────────────
+    // Multipliers match makeClusterForce so the initial layout already sits
+    // inside the centre 50 % of the canvas (W-CI overlap-fix).
     for (const node of nodes) {
       const c = CLUSTER_CENTROIDS[node.stakeholder];
-      node.x = dimsRef.w * 0.5 + c[0] * dimsRef.w * 0.32 + (Math.random() - 0.5) * 60;
-      node.y = dimsRef.h * 0.5 + c[1] * dimsRef.h * 0.34 + (Math.random() - 0.5) * 60;
+      node.x = dimsRef.w * 0.5 + c[0] * dimsRef.w * 0.24 + (Math.random() - 0.5) * 50;
+      node.y = dimsRef.h * 0.5 + c[1] * dimsRef.h * 0.26 + (Math.random() - 0.5) * 50;
     }
 
     // ── Forces ──────────────────────────────────────────────────────────
